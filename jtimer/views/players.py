@@ -30,16 +30,7 @@ def find_player():
     steamid = request.args.get("steamid", default=None, type=str)
     name = request.args.get("name", default=None, type=str)
 
-    player = None
-
-    if playerid != None:
-        player = mdl_find_player(playerid=playerid)
-
-    elif steamid != None:
-        player = mdl_find_player(steamid=steamid)
-
-    elif name != None:
-        player = mdl_find_player(name=name)
+    player = mdl_find_player(playerid=playerid, steamid=steamid, name=name)
 
     if player != None:
         player_object = player.get_object()
