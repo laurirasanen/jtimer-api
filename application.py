@@ -42,18 +42,6 @@ def list_players():
     players = None
     if mysql.connection != None:
         with closing(mysql.connection.cursor()) as cursor:
-            cursor.execute(
-                """
-                SELECT `COLUMN_NAME` 
-                FROM `INFORMATION_SCHEMA`.`COLUMNS` 
-                WHERE `TABLE_SCHEMA`=%s 
-                AND `TABLE_NAME`='players';
-                """, 
-                (
-                    application.config["MYSQL_DB"],
-                )
-            )
-            columns = cursor.fetchall()
             cursor.execute("""SELECT * FROM players""")
             players = cursor.fetchall()
 
