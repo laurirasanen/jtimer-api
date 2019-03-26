@@ -7,6 +7,9 @@ from jtimer.extensions import mysql
 
 
 def check_tables():
+    if os.environ.get("READTHEDOCS") is True:
+        return
+        
     if mysql.connection != None:
         with closing(mysql.connection.cursor()) as cursor:
             query = """
