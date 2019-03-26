@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="jtimer-api",
-    extras_require={
+    install_requires={
         "doc": [
             "sphinxcontrib.httpdomain",
             "sphinxcontrib.autohttp.flask",
