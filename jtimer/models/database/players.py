@@ -1,45 +1,36 @@
-from contextlib import closing
-
-from jtimer.extensions import mysql
+from . import engine
+from . import Tables
 
 
 def list_players(start=0, limit=50):
-    players = None
-    if mysql.connection != None:
-        with closing(mysql.connection.cursor()) as cursor:
-            cursor.execute(
-                """SELECT * FROM players LIMIT %s OFFSET %s""", (limit, start)
-            )
-            players = cursor.fetchall()
+    result = []
+    with engine.begin() as conn:
+        result = (
+            Tables.players.select()
+            .where(Tables.players.c.id >= start)
+            .order_by(Tables.players.c.id)
+            .execute()
+        )
 
-    return players
+    return result
 
 
 def find_player(playerid=None, steamid=None, name=None):
-    player = None
+    result = []
 
     if playerid != None:
-        if mysql.connection != None:
-            with closing(mysql.connection.cursor()) as cursor:
-                cursor.execute(
-                    """SELECT * FROM players WHERE id=%s LIMIT 1""", (playerid,)
-                )
-                player = cursor.fetchone()
+        result = (
+            Tables.players.select().where(Tables.players.c.id == playerid).execute()
+        )
 
     elif steamid != None:
-        if mysql.connection != None:
-            with closing(mysql.connection.cursor()) as cursor:
-                cursor.execute(
-                    """SELECT * FROM players WHERE steamid=%s LIMIT 1""", (steamid,)
-                )
-                player = cursor.fetchone()
+        result = (
+            Tables.players.select().where(Tables.players.c.steamid == steamid).execute()
+        )
 
     elif name != None:
-        if mysql.connection != None:
-            with closing(mysql.connection.cursor()) as cursor:
-                cursor.execute(
-                    """SELECT * FROM players WHERE username=%s LIMIT 1""", (name,)
-                )
-                player = cursor.fetchone()
+        result = (
+            Tables.players.select().where(Tables.players.c.username == name).execute()
+        )
 
-    return player
+    return result

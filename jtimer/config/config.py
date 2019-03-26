@@ -25,4 +25,6 @@ class MySQL(object):
         MYSQL_PASSWORD = "foo"
 
     if os.environ.get("RDS_DB_NAME") is None:
-        os.environ["RDS_DB_NAME"] = "jtimerdb"
+        MYSQL_DB = "jtimerdb"
+    else:
+        MYSQL_DB = os.environ.get("RDS_DB_NAME")
