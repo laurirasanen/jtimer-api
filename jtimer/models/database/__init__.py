@@ -122,5 +122,5 @@ class Tables:
 
 
 # don't create tables if we're just building docs
-if os.environ.get("READTHEDOCS") is not "True":
+if not os.environ.get("READTHEDOCS"):
     metadata.create_all()
