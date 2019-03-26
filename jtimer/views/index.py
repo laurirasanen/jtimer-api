@@ -8,7 +8,7 @@ config = ConfigParser()
 @application_index.route("/")
 def index():
     return make_response(
-        "http://github.com/occasionally-cool/jtimer-beanstalk-api", 418
+        "http://github.com/occasionally-cool/jtimer-api", 418
     )  # I'm a teapot
 
 
