@@ -48,15 +48,15 @@ def list_players():
       ]
     
     :query limit: amount of players to get. (default: 50, min: 1, max: 50)
-    :query start: list index to start getting players from. (default: 0, min: 0)
+    :query start: player id to start the list from. (default: 1, min: 1)
     :status 200: players found.
     :returns: Player
     """
     limit = request.args.get("limit", default=50, type=int)
-    start = request.args.get("start", default=0, type=int)
+    start = request.args.get("start", default=1, type=int)
 
     limit = max(1, min(limit, 50))
-    start = max(0, start)
+    start = max(1, start)
 
     players = mdl_list_players(limit=limit, start=start)
     player_objects = []
