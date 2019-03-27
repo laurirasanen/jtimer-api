@@ -5,6 +5,7 @@ from importlib import import_module
 from flask import Flask, request, make_response, jsonify
 
 from jtimer.blueprints import all_blueprints
+from jtimer.extensions import db
 
 
 def get_config(config_class_string):
@@ -24,6 +25,10 @@ application = Flask(__name__)
 
 # load cfg
 application.config.update(get_config("jtimer.config.config.MySQL"))
+application.config.update(get_config("jtimer.config.config.Api"))
+
+# initialize extensions
+db.init_app(application)
 
 # make sure we have context of current app before importing blueprints
 with application.app_context():
@@ -31,3 +36,10 @@ with application.app_context():
     for bp in all_blueprints:
         import_module(bp.import_name)
         application.register_blueprint(bp)
+
+
+@application.before_first_request
+def init():
+    # don't create tables if we're just building docs
+    if not os.environ.get("READTHEDOCS"):
+        db.create_all()
