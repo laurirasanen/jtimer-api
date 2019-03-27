@@ -1,9 +1,7 @@
 from flask import jsonify, make_response, request
 from jtimer.blueprints import players_index
-from jtimer.models.player import (
-    list_players as mdl_list_players,
-    find_player as mdl_find_player,
-)
+from jtimer.extensions import db
+from jtimer.models.database import Player
 
 
 @players_index.route("/list")
@@ -58,14 +56,12 @@ def list_players():
     limit = max(1, min(limit, 50))
     start = max(1, start)
 
-    players = mdl_list_players(limit=limit, start=start)
-    player_objects = []
+    players = Player.query.filter(Player.playerid >= start).order_by(Player.playerid)[:limit]
 
-    if players != None:
-        for p in players:
-            player_objects.append(p.get_object())
-
-    return make_response(jsonify(player_objects), 200)
+    if players is None:
+        return make_response("", 204)
+    else:
+        return make_response(jsonify([p.serialize for p in players]), 200)    
 
 
 @players_index.route("/search")
@@ -111,10 +107,13 @@ def find_player():
     steamid = request.args.get("steamid", default=None, type=str)
     name = request.args.get("name", default=None, type=str)
 
-    player = mdl_find_player(playerid=playerid, steamid=steamid, name=name)
+    player = Player.query.filter_by(playerid=playerid).first()
+    if player is None:
+        player = Player.query.filter_by(steamid=steamid).first()
+    if player is None:
+        player = Player.query.filter_by(username=name).first()
 
-    if player != None:
-        player_object = player.get_object()
-        return make_response(jsonify(player_object), 200)
-
-    return make_response("", 204)
+    if player is None:
+        return make_response("", 204)
+    else:
+        return make_response(jsonify(player.serialize), 200)
