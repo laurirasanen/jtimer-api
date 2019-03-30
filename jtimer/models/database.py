@@ -1,4 +1,5 @@
 from jtimer.extensions import db
+from passlib.hash import bcrypt
 
 
 class Player(db.Model):
@@ -16,12 +17,8 @@ class Player(db.Model):
             "steamid": self.steamid,
             "name": self.username,
             "country": self.country,
-            "rank_info": {
-                "spoints": self.spoints,
-                "dpoints": self.dpoints
-            }
+            "rank_info": {"soldier_points": self.spoints, "demo_points": self.dpoints},
         }
-    
 
 
 class Zone(db.Model):
@@ -91,3 +88,44 @@ class BonusCheckpoint(db.Model):
     zoneid = db.Column("zoneid", None, db.ForeignKey("zone.id"), nullable=False)
     bonusid = db.Column("bonusid", None, db.ForeignKey("bonus.id"), nullable=False)
     cpindex = db.Column("cpindex", db.Integer, nullable=False)
+
+
+class User(db.Model):
+    """Model for authenticating restricted views"""
+
+    userid = db.Column("id", db.Integer, primary_key=True)
+    username = db.Column("username", db.String(64), nullable=False)
+    password = db.Column("password", db.String(256), nullable=False)
+
+    @staticmethod
+    def generate_hash(password):
+        return bcrypt.hash(password)
+
+    def verify_hash(self, password):
+        return bcrypt.verify(password, self.password)
+
+    def change_hash(self, password):
+        self.password = self.generate_hash(password)
+        db.session.commit()
+
+    def add(self):
+        query = User.query.filter_by(username=self.username).first()
+        if not bool(query):
+            db.session.add(self)
+            db.session.commit()
+
+
+class RevokedToken(db.Model):
+    """Model for storing revoked tokens"""
+
+    tokenid = db.Column("tokenid", db.Integer, primary_key=True)
+    jti = db.Column("jti", db.String(120), nullable=False)
+
+    def add(self):
+        db.session.add(self)
+        db.session.commit()
+
+    @classmethod
+    def is_jti_blacklisted(cls, jti):
+        query = cls.query.filter_by(jti=jti).first()
+        return bool(query)

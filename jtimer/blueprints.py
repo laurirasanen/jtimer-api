@@ -11,5 +11,7 @@ def factory(views_path, url_prefix):
 
 application_index = factory("index", "/")
 players_index = factory("players", "/players")
+token_index = factory("token", "/token")
+user_index = factory("user", "/user")
 
-all_blueprints = (application_index, players_index)
+all_blueprints = (application_index, players_index, token_index, user_index)

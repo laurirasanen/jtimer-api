@@ -2,3 +2,6 @@ flask
 mysqlclient
 sqlalchemy
 flask-sqlalchemy
+flask-jwt-extended
+passlib
+bcrypt

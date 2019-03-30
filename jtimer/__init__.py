@@ -2,10 +2,11 @@ import os
 import json
 from importlib import import_module
 
-from flask import Flask, request, make_response, jsonify
+from flask import Flask, request, redirect, make_response, jsonify
 
 from jtimer.blueprints import all_blueprints
-from jtimer.extensions import db
+from jtimer.extensions import db, jwt
+from jtimer.models.database import RevokedToken, User
 
 
 def get_config(config_class_string):
@@ -29,6 +30,14 @@ application.config.update(get_config("jtimer.config.config.Api"))
 
 # initialize extensions
 db.init_app(application)
+jwt.init_app(application)
+
+
+@jwt.token_in_blacklist_loader
+def check_if_token_in_blacklist(decrypted_token):
+    jti = decrypted_token["jti"]
+    return RevokedToken.is_jti_blacklisted(jti)
+
 
 # make sure we have context of current app before importing blueprints
 with application.app_context():
@@ -37,9 +46,6 @@ with application.app_context():
         import_module(bp.import_name)
         application.register_blueprint(bp)
 
-
-@application.before_first_request
-def init():
     # don't create tables if we're just building docs
     if not os.environ.get("READTHEDOCS"):
         db.create_all()

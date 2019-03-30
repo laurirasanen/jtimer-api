@@ -1,5 +1,5 @@
-Welcome to jtimer-api's documentation!
-======================================
+jtimer-api documentation
+========================
 
 Summary
 -------
@@ -12,3 +12,5 @@ API Details
 
 .. autoflask:: jtimer:application
   :undoc-static:
+  :order: path
+  :groupby: view
