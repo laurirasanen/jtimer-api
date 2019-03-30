@@ -36,7 +36,7 @@ class Api(object):
 
     if not os.environ.get("READTHEDOCS"):
         assert os.environ.get("SECRET_KEY") != None
-        SECRET_KEY = os.environ.get("SECRET_KEY").encode()
+        SECRET_KEY = os.environ.get("SECRET_KEY")
 
         assert os.environ.get("JWT_SECRET_KEY") != None
         JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY")

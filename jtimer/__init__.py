@@ -2,7 +2,7 @@ import os
 import json
 from importlib import import_module
 
-from flask import Flask, request, redirect, make_response, jsonify
+from flask import Flask, request, make_response, jsonify
 
 from jtimer.blueprints import all_blueprints
 from jtimer.extensions import db, jwt
