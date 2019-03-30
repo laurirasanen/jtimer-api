@@ -19,6 +19,14 @@ sys.path.insert(0, os.path.abspath(".."))
 
 import sphinx_rtd_theme
 
+from configparser import ConfigParser
+
+config = ConfigParser()
+config.read("../jtimer/config/info.ini")
+info = {}
+info["version"] = config.get("root", "version", fallback=None)
+info["source"] = config.get("root", "source", fallback=None)
+
 
 # -- Project information -----------------------------------------------------
 
@@ -27,9 +35,9 @@ copyright = "2019, occasionally cool"
 author = "occasionally cool"
 
 # The short X.Y version
-version = "0.1.2"
+version = info["version"]
 # The full version, including alpha/beta/rc tags
-release = "0.1.2"
+release = info["version"]
 
 
 # -- General configuration ---------------------------------------------------
@@ -161,7 +169,7 @@ texinfo_documents = [
         "jtimer-api Documentation",
         author,
         "jtimer-api",
-        "One line description of project.",
+        "Api for jtimer.",
         "Miscellaneous",
     )
 ]

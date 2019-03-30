@@ -56,12 +56,14 @@ def list_players():
     limit = max(1, min(limit, 50))
     start = max(1, start)
 
-    players = Player.query.filter(Player.playerid >= start).order_by(Player.playerid)[:limit]
+    players = Player.query.filter(Player.playerid >= start).order_by(Player.playerid)[
+        :limit
+    ]
 
     if players is None:
         return make_response("", 204)
     else:
-        return make_response(jsonify([p.serialize for p in players]), 200)    
+        return make_response(jsonify([p.serialize for p in players]), 200)
 
 
 @players_index.route("/search")
