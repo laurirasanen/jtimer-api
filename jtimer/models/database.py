@@ -36,15 +36,37 @@ class Map(db.Model):
     mapname = db.Column("mapname", db.String(128), nullable=False)
     stier = db.Column("stier", db.Integer, default=0, nullable=False)
     dtier = db.Column("dtier", db.Integer, default=0, nullable=False)
-    completions = db.Column("completions", db.Integer, default=0, nullable=False)
+    scompletions = db.Column("scompletions", db.Integer, default=0, nullable=False)
+    dcompletions = db.Column("dcompletions", db.Integer, default=0, nullable=False)
     startzone = db.Column("startzone", None, db.ForeignKey("zone.id"), nullable=False)
     endzone = db.Column("endzone", None, db.ForeignKey("zone.id"), nullable=False)
+
+    @property
+    def serialize(self):
+        return {
+            "id": self.mapid,
+            "name": self.mapname,
+            "tiers": {"soldier": self.stier, "demoman": self.dtier},
+            "completions": {"soldier": self.scompletions, "demoman": self.dcompletions},
+        }
 
 
 class Author(db.Model):
     authorid = db.Column("id", db.Integer, primary_key=True)
-    playerid = db.Column("playerid", None, db.ForeignKey("player.id"), nullable=False)
+    name = db.Column("name", db.String(32), nullable=False)
+    playerid = db.Column("playerid", None, db.ForeignKey("player.id"), nullable=True)
     mapid = db.Column("mapid", None, db.ForeignKey("map.id"), nullable=False)
+
+    @property
+    def serialize(self):
+        player = Player.query.filter_by(playerid=playerid).first()
+        if player:
+            player_json = player.serialize()
+            del player_json["rank_info"]
+            player_json["name"] = self.name
+            return player_json
+        else:
+            return {"name": self.name}
 
 
 class Course(db.Model):

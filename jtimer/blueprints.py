@@ -13,5 +13,6 @@ application_index = factory("index", "/")
 players_index = factory("players", "/players")
 token_index = factory("token", "/token")
 user_index = factory("user", "/user")
+maps_index = factory("maps", "/maps")
 
-all_blueprints = (application_index, players_index, token_index, user_index)
+all_blueprints = (application_index, players_index, token_index, user_index, maps_index)
