@@ -21,9 +21,31 @@ def get_map_zones():
 
     .. sourcecode:: json
 
-      {
-          "message": "zone added."
-      }
+      [
+          {
+            "id": 1,
+            "p1": [0, 0, 0],
+            "p2": [256, 256, 256],
+            "zone_type": "start"
+          },
+          {
+            "id": 2,
+            "p1": [1000, 1000, 1000],
+            "p2": [1256, 1256, 1256],
+            "zone_type": "end"
+          },
+          {
+            "id": 1,
+            "zone_type": "cp",
+            "map_id": 1,
+            "cp_index": 1,
+            "zone": {
+                "id": 3,
+                "p1": [500, 500, 500],
+                "p2": [756, 756, 756]
+            }
+          }
+      ]
     
     :query map_id: map id.
     
