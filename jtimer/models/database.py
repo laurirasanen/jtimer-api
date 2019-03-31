@@ -18,8 +18,8 @@ class Player(db.Model):
             "name": self.username,
             "country": self.country,
             "rank_info": {
-                "soldier_points": self.s_points, 
-                "demo_points": self.d_points
+                "soldier_points": self.s_points,
+                "demo_points": self.d_points,
             },
         }
 
@@ -51,8 +51,8 @@ class Map(db.Model):
             "name": self.mapname,
             "tiers": {"soldier": self.stier, "demoman": self.dtier},
             "completions": {
-                "soldier": self.s_completions, 
-                "demoman": self.d_completions
+                "soldier": self.s_completions,
+                "demoman": self.d_completions,
             },
         }
 
@@ -129,6 +129,28 @@ class MapTimes(db.Model):
     end_time = db.Column(db.Double, nullable=False)
     rank = db.Column(db.Integer, nullable=False)
 
+    @property
+    def serialize(self):
+        player = Player.query.filter_by(id_=self.player_id).first()
+        if player is None:
+            return {
+                "id": self.id_,
+                "map_id": self.map_id,
+                "player_id": self.player_id,
+                "class": self.player_class,
+                "time": self.end_time - self.start_time,
+                "rank": self.rank,
+            }
+        else:
+            return {
+                "id": self.id_,
+                "map_id": self.map_id,
+                "player": player.serialize(),
+                "class": self.player_class,
+                "time": self.end_time - self.start_time,
+                "rank": self.rank,
+            }
+
 
 class CourseTimes(db.Model):
     id_ = db.Column("id", db.Integer, primary_key=True)
@@ -159,14 +181,18 @@ class MapCheckpointTimes(db.Model):
 
 class CourseCheckpointTimes(db.Model):
     id_ = db.Column("id", db.Integer, primary_key=True)
-    checkpoint_id = db.Column(None, db.ForeignKey("course_checkpoint.id"), nullable=False)
+    checkpoint_id = db.Column(
+        None, db.ForeignKey("course_checkpoint.id"), nullable=False
+    )
     time_id = db.Column(None, db.ForeignKey("course_times.id"), nullable=False)
     time = db.Column(db.Double, nullable=False)
 
 
 class MapCheckpointTimes(db.Model):
     id_ = db.Column("id", db.Integer, primary_key=True)
-    checkpoint_id = db.Column(None, db.ForeignKey("bonus_checkpoint.id"), nullable=False)
+    checkpoint_id = db.Column(
+        None, db.ForeignKey("bonus_checkpoint.id"), nullable=False
+    )
     time_id = db.Column(None, db.ForeignKey("bonus_times.id"), nullable=False)
     time = db.Column(db.Double, nullable=False)
 

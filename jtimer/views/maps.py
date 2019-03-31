@@ -5,7 +5,7 @@ from jtimer.models.database import Map, Author
 from flask_jwt_extended import jwt_required, jwt_refresh_token_required
 
 
-maps.route("/<int:id>/info", methods=["GET"])
+maps_index.route("/<int:id>/info", methods=["GET"])
 
 
 def map_info(mapid):
