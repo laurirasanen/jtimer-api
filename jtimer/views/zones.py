@@ -44,12 +44,14 @@ def get_map_zones():
         if zone:
             zone_dict = zone.serialize()
             zone_dict["zone_type"] = "start"
+            zones.append(zone_dict)
 
     if map_.end_zone != None:
         zone = Zone.query.filter_by(id_=map_.end_zone).first()
         if zone:
             zone_dict = zone.serialize()
             zone_dict["zone_type"] = "end"
+            zones.append(zone_dict)
 
     checkpoints = MapCheckpoint.query.filter_by(map_id=map_id).all()
     if checkpoints:
