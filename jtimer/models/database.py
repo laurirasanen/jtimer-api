@@ -35,6 +35,12 @@ class Zone(db.Model):
     y2 = db.Column(db.Integer, nullable=False)
     z2 = db.Column(db.Integer, nullable=False)
 
+    def add(self):
+        query = Zone.query.filter_by(id_=self.id_).first()
+        if not query:
+            db.session.add(self)
+        db.session.commit()
+
 
 class Map(db.Model):
     id_ = db.Column("id", db.Integer, primary_key=True)
@@ -115,6 +121,12 @@ class MapCheckpoint(db.Model):
     zone_id = db.Column(None, db.ForeignKey("zone.id"), nullable=False)
     map_id = db.Column(None, db.ForeignKey("map.id"), nullable=False)
     cp_index = db.Column(db.Integer, nullable=False)
+
+    def add(self):
+        query = MapCheckpoint.query.filter_by(id_=self.id_).first()
+        if not query:
+            db.session.add(self)
+        db.session.commit()
 
 
 class CourseCheckpoint(db.Model):

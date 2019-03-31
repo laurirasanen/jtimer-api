@@ -15,6 +15,7 @@ token_index = factory("token", "/token")
 user_index = factory("user", "/user")
 maps_index = factory("maps", "/maps")
 times_index = factory("times", "/times")
+zones_index = factory("zones", "/zones")
 
 all_blueprints = (
     application_index,
@@ -23,4 +24,5 @@ all_blueprints = (
     user_index,
     maps_index,
     times_index,
+    zones_index,
 )

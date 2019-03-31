@@ -117,8 +117,8 @@ def add_map():
         error = {"message": "Missing name."}
         return make_response(jsonify(error), 422)
 
-    if type(name) != type(str):
-        error = {"message": "name is not type(str)."}
+    if not isinstance(name, str):
+        error = {"message": "name is not type of str."}
         return make_response(jsonify(error), 422)
 
     if len(name) > 128:
@@ -128,8 +128,8 @@ def add_map():
     # stier validation
     stier = data.get("stier")
     if stier is not None:
-        if type(stier) != type(int):
-            error = {"message": "stier is not type(int)."}
+        if not isinstance(stier, int):
+            error = {"message": "stier is not type of int."}
             return make_response(jsonify(error), 422)
 
         if stier < 0:
@@ -144,8 +144,8 @@ def add_map():
     # dtier validation
     dtier = data.get("dtier")
     if dtier is not None:
-        if type(dtier) != type(int):
-            error = {"message": "dtier is not type(int)."}
+        if not isinstance(dtier, int):
+            error = {"message": "dtier is not type of int."}
             return make_response(jsonify(error), 422)
 
         if dtier < 0:
@@ -229,8 +229,8 @@ def update(map_id):
     # stier validation
     stier = data.get("stier")
     if stier is not None:
-        if type(stier) != type(int):
-            error = {"message": "stier is not type(int)."}
+        if not isinstance(stier, int):
+            error = {"message": "stier is not type of int."}
             return make_response(jsonify(error), 422)
 
         if stier < 0:
@@ -245,8 +245,8 @@ def update(map_id):
     # dtier validation
     dtier = data.get("dtier")
     if dtier is not None:
-        if type(dtier) != type(int):
-            error = {"message": "dtier is not type(int)."}
+        if not isinstance(diter, int):
+            error = {"message": "dtier is not type of int."}
             return make_response(jsonify(error), 422)
 
         if dtier < 0:
@@ -261,8 +261,8 @@ def update(map_id):
     # name validation
     name = data.get("name")
     if name is not None:
-        if type(name) != type(str):
-            error = {"message": "name is not type(str)."}
+        if not isinstance(name, str):
+            error = {"message": "name is not type of str."}
             return make_response(jsonify(error), 422)
 
         if len(name) > 128:

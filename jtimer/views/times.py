@@ -133,8 +133,8 @@ def insert_map(map_id):
         error = {"message": "Missing player_id"}
         return make_response(jsonify(error), 422)
 
-    if type(player_id) != type(int):
-        error = {"message": "player_id is not type(int)"}
+    if not isinstance(player_id, int):
+        error = {"message": "player_id is not type of int."}
         return make_response(jsonify(error), 422)
 
     if player_id < 1:
@@ -147,8 +147,8 @@ def insert_map(map_id):
         error = {"message": "Missing player_class"}
         return make_response(jsonify(error), 422)
 
-    if type(player_class) != type(int):
-        error = {"message": "player_class is not type(int)"}
+    if not isinstance(player_class, int):
+        error = {"message": "player_class is not type of int."}
         return make_response(jsonify(error), 422)
 
     if player_class != 2 and player_class != 4:
@@ -163,8 +163,8 @@ def insert_map(map_id):
         error = {"message": "Missing start_time"}
         return make_response(jsonify(error), 422)
 
-    if type(start_time) != type(float):
-        error = {"message": "start_time is not type(float)"}
+    if not isinstance(start_time, float):
+        error = {"message": "start_time is not type of float."}
         return make_response(jsonify(error), 422)
 
     if start_time < 0:
@@ -177,8 +177,8 @@ def insert_map(map_id):
         error = {"message": "Missing end_time"}
         return make_response(jsonify(error), 422)
 
-    if type(end_time) != type(float):
-        error = {"message": "end_time is not type(float)"}
+    if not isinstance(end_time, float):
+        error = {"message": "end_time is not type of float."}
         return make_response(jsonify(error), 422)
 
     if end_time < 0:
