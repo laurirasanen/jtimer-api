@@ -59,7 +59,9 @@ class Map(db.Model):
         }
 
     def add(self):
-        query = Map.query.filter_by(mapname=self.name).first()
+        query = Map.query.filter(
+            Map.mapname == self.name or Map.id_ == self.id_
+        ).first()
         if not query:
             db.session.add(self)
 
@@ -199,7 +201,7 @@ class MapTimes(db.Model):
                     "rank": self.rank,
                     "points_gained": self.points - old_points,
                     "completions": completions,
-                    "improvement": improvement
+                    "improvement": improvement,
                 }
             else:
                 # slower

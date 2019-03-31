@@ -98,7 +98,7 @@ def add_map():
     :status 415: Missing 'Content-Type: application/json' header.
     :status 422: Missing or invalid json content.
 
-    :returns: Map info
+    :returns: Map added result.
     """
 
     if not request.is_json:
@@ -159,13 +159,129 @@ def add_map():
 
     query = Map.query.filter_by(mapname=name).first()
     if query:
-        error = {"message": f"map with name '{name}' already exists (id: {query.id_})! Use update endpoint instead."}
+        error = {
+            "message": f"map with name '{name}' already exists (id: {query.id_})! Use update endpoint instead."
+        }
         return make_response(jsonify(error), 409)
 
     map_ = Map(mapname=name, stier=stier, dtier=dtier)
     map_.add()
+    response = {"message": f"map '{name}' added!", "map_id": map_.id_}
+    return make_response(jsonify(response), 200)
+
+
+@maps_index.route("/update/<int:map_id>", methods=["POST"])
+@jwt_required
+def update(map_id):
+    """Update existing map.
+
+    .. :quickref: Maps; Update existing map.
+
+    **Example request**:
+
+    .. sourcecode:: http   
+
+      POST /maps/update/1 HTTP/1.1
+      Authorization: Bearer <access_token>
+      {
+          "stier": 10
+      }
+    
+    **Example response**:
+
+    .. sourcecode:: json
+    
+      {
+          "message": "map updated!",
+          "map_id": 1,
+          "name": "jump_soar_a4",
+          "stier": 10,
+          "dtier": 3
+      }
+    
+    :query name: map name. (optional, max length: 128)
+    :query stier: soldier tier. (optional, min: 0, max: 10)
+    :query dtier: demoman tier. (optional, min: 0, max: 10)
+    
+    :status 200: Success.
+    :status 409: Map name already exists.
+    :status 415: Missing 'Content-Type: application/json' header.
+    :status 422: Missing or invalid json content.
+
+    :returns: Map added result.
+    """
+    if not request.is_json:
+        error = {"message": "Missing 'Content-Type: application/json' header."}
+        return make_response(jsonify(error), 415)
+
+    data = request.get_json()
+
+    if data is None:
+        error = {"message": "Missing json content"}
+        return make_response(jsonify(error), 422)
+
+    map_ = Map.query.filter_by(id_=map_id).first()
+
+    if map_ is None:
+        response = {"message": "Map not found."}
+        return make_response(jsonify(response), 404)
+
+    # stier validation
+    stier = data.get("stier")
+    if stier is not None:
+        if type(stier) != type(int):
+            error = {"message": "stier is not type(int)."}
+            return make_response(jsonify(error), 422)
+
+        if stier < 0:
+            error = {"message": "stier is negative."}
+            return make_response(jsonify(error), 422)
+        elif stier > 10:
+            error = {"message": "stier is too big. Max value: 10"}
+            return make_response(jsonify(error), 422)
+
+        map_.stier = stier
+
+    # dtier validation
+    dtier = data.get("dtier")
+    if dtier is not None:
+        if type(dtier) != type(int):
+            error = {"message": "dtier is not type(int)."}
+            return make_response(jsonify(error), 422)
+
+        if dtier < 0:
+            error = {"message": "dtier is negative."}
+            return make_response(jsonify(error), 422)
+        elif dtier > 10:
+            error = {"message": "dtier is too big.  Max value: 10"}
+            return make_response(jsonify(error), 422)
+
+        map_.dtier = dtier
+
+    # name validation
+    name = data.get("name")
+    if name is not None:
+        if type(name) != type(str):
+            error = {"message": "name is not type(str)."}
+            return make_response(jsonify(error), 422)
+
+        if len(name) > 128:
+            error = {"message": "name is too long. Max length: 128."}
+            return make_response(jsonify(error), 422)
+
+        query = Map.query.filter_by(mapname=name).first()
+        if query:
+            error = {"message": f"map with name '{name}' already exists!"}
+            return make_response(jsonify(error), 409)
+        else:
+            map_.mapname = name
+
+    map_.add()
     response = {
-        "message": f"map '{name}' added!",
-        "map_id": map_.id_
+        "message": "map updated!",
+        "map_id": map_.id,
+        "name": map_.mapname,
+        "stier": map_.stier,
+        "dtier": map_.dtier,
     }
     return make_response(jsonify(response), 200)
