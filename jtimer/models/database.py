@@ -1,5 +1,7 @@
 from jtimer.extensions import db
 from passlib.hash import bcrypt
+from enum import Enum
+from jtimer.points import calc_points
 
 
 class Player(db.Model):
@@ -127,7 +129,9 @@ class MapTimes(db.Model):
     player_class = db.Column(db.Integer, nullable=False)
     start_time = db.Column(db.Float(precision=53), nullable=False)
     end_time = db.Column(db.Float(precision=53), nullable=False)
-    rank = db.Column(db.Integer, nullable=False)
+    duration = db.Column(db.Float(precision=53), nullable=False)
+    rank = db.Column(db.Integer, nullable=True)
+    points = db.Column(db.Integer, nullable=True)
 
     @property
     def serialize(self):
@@ -150,6 +154,64 @@ class MapTimes(db.Model):
                 "time": self.end_time - self.start_time,
                 "rank": self.rank,
             }
+
+    def add(self):
+        query = MapTimes.query.filter(
+            MapTimes.map_id == self.map_id
+            and MapTimes.player_id == self.player_id
+            and MapTimes.player_class == self.player_class
+        ).first()
+        if not bool(query):
+            # no existing run, add this
+            db.session.add(self)
+            db.session.commit()
+            # update ranks
+            completions = MapTimes.update_ranks(self.map_id)
+            return {
+                "result": InsertResult.ADDED,
+                "rank": self.rank,
+                "completions": completions,
+                "points_gained": self.points,
+            }
+        else:
+            # time already exists, check if faster
+            old_time = query.end_time - query.start_time
+            new_time = self.end_time - self.start_time
+            old_points = query.points
+            if new_time < old_time:
+                improvement = old_time - new_time
+                # faster, add this
+                db.session.add(self)
+                # remove old time
+                db.session.delete(query)
+                db.session.commit()
+                # update ranks
+                completions = MapTimes.update_ranks(self.map_id)
+                return {
+                    "result": InsertResult.UPDATED,
+                    "rank": self.rank,
+                    "points_gained": self.points - old_points,
+                    "completions": completions,
+                    "improvement": improvement
+                }
+            else:
+                # slower
+                return {"result": InsertResult.NONE}
+
+    @classmethod
+    def update_ranks(map_id):
+        times = (
+            MapTimes.query.filter(MapTimes.map_id == map_id).order_by(duration).all()
+        )
+        if times:
+            for i in range(0, len(times)):
+                times[i].rank = i + 1
+                times[i].points = calc_points(
+                    times[0].duration, times[i].duration, len(times)
+                )
+            db.session.commit()
+            return len(times)
+        return 0
 
 
 class CourseTimes(db.Model):
@@ -236,3 +298,9 @@ class RevokedToken(db.Model):
     def is_jti_blacklisted(cls, jti):
         query = cls.query.filter_by(jti=jti).first()
         return bool(query)
+
+
+class InsertResult(Enum):
+    NONE = 0
+    ADDED = 1
+    UPDATED = 2

@@ -1,3 +1,6 @@
 # docs
-docs/_build# python cache
+docs/_build
+# deploy archives
+*.zip
+# python cache
 *.pyc
