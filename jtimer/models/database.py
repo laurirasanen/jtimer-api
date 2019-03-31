@@ -43,8 +43,8 @@ class Map(db.Model):
     dtier = db.Column(db.Integer, default=0, nullable=False)
     s_completions = db.Column(db.Integer, default=0, nullable=False)
     d_completions = db.Column(db.Integer, default=0, nullable=False)
-    start_zone = db.Column(None, db.ForeignKey("zone.id"), nullable=False)
-    end_zone = db.Column(None, db.ForeignKey("zone.id"), nullable=False)
+    start_zone = db.Column(None, db.ForeignKey("zone.id"), nullable=True)
+    end_zone = db.Column(None, db.ForeignKey("zone.id"), nullable=True)
 
     @property
     def serialize(self):
@@ -57,6 +57,13 @@ class Map(db.Model):
                 "demoman": self.d_completions,
             },
         }
+
+    def add(self):
+        query = Map.query.filter_by(mapname=self.name).first()
+        if not query:
+            db.session.add(self)
+
+        db.session.commit()
 
 
 class Author(db.Model):

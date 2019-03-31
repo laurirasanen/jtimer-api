@@ -117,7 +117,6 @@ def insert_map(map_id):
         return make_response(jsonify(error), 415)
 
     data = request.get_json()
-    error = None
 
     if data is None:
         error = {"message": "Missing json content"}
