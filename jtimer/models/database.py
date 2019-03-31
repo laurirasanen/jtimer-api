@@ -3,119 +3,178 @@ from passlib.hash import bcrypt
 
 
 class Player(db.Model):
-    playerid = db.Column("id", db.Integer, primary_key=True)
-    steamid = db.Column("steamid", db.String(17), nullable=False)
-    username = db.Column("username", db.String(32), nullable=False)
-    country = db.Column("country", db.String(2), nullable=False)
-    spoints = db.Column("spoints", db.Integer, default=0, nullable=False)
-    dpoints = db.Column("dpoints", db.Integer, default=0, nullable=False)
+    id_ = db.Column("id", db.Integer, primary_key=True)
+    steam_id = db.Column(db.String(17), nullable=False)
+    username = db.Column(db.String(32), nullable=False)
+    country = db.Column(db.String(2), nullable=False)
+    s_points = db.Column(db.Integer, default=0, nullable=False)
+    d_points = db.Column(db.Integer, default=0, nullable=False)
 
     @property
     def serialize(self):
         return {
-            "id": self.playerid,
+            "id": self.id_,
             "steamid": self.steamid,
             "name": self.username,
             "country": self.country,
-            "rank_info": {"soldier_points": self.spoints, "demo_points": self.dpoints},
+            "rank_info": {
+                "soldier_points": self.s_points, 
+                "demo_points": self.d_points
+            },
         }
 
 
 class Zone(db.Model):
-    zoneid = db.Column("id", db.Integer, primary_key=True)
-    x1 = db.Column("x1", db.Integer, nullable=False)
-    y1 = db.Column("y1", db.Integer, nullable=False)
-    z1 = db.Column("z1", db.Integer, nullable=False)
-    x2 = db.Column("x2", db.Integer, nullable=False)
-    y2 = db.Column("y2", db.Integer, nullable=False)
-    z2 = db.Column("z2", db.Integer, nullable=False)
+    id_ = db.Column("id", db.Integer, primary_key=True)
+    x1 = db.Column(db.Integer, nullable=False)
+    y1 = db.Column(db.Integer, nullable=False)
+    z1 = db.Column(db.Integer, nullable=False)
+    x2 = db.Column(db.Integer, nullable=False)
+    y2 = db.Column(db.Integer, nullable=False)
+    z2 = db.Column(db.Integer, nullable=False)
 
 
 class Map(db.Model):
-    mapid = db.Column("id", db.Integer, primary_key=True)
-    mapname = db.Column("mapname", db.String(128), nullable=False)
-    stier = db.Column("stier", db.Integer, default=0, nullable=False)
-    dtier = db.Column("dtier", db.Integer, default=0, nullable=False)
-    scompletions = db.Column("scompletions", db.Integer, default=0, nullable=False)
-    dcompletions = db.Column("dcompletions", db.Integer, default=0, nullable=False)
-    startzone = db.Column("startzone", None, db.ForeignKey("zone.id"), nullable=False)
-    endzone = db.Column("endzone", None, db.ForeignKey("zone.id"), nullable=False)
+    id_ = db.Column("id", db.Integer, primary_key=True)
+    mapname = db.Column(db.String(128), nullable=False)
+    stier = db.Column(db.Integer, default=0, nullable=False)
+    dtier = db.Column(db.Integer, default=0, nullable=False)
+    s_completions = db.Column(db.Integer, default=0, nullable=False)
+    d_completions = db.Column(db.Integer, default=0, nullable=False)
+    start_zone = db.Column(None, db.ForeignKey("zone.id"), nullable=False)
+    end_zone = db.Column(None, db.ForeignKey("zone.id"), nullable=False)
 
     @property
     def serialize(self):
         return {
-            "id": self.mapid,
+            "id": self.id_,
             "name": self.mapname,
             "tiers": {"soldier": self.stier, "demoman": self.dtier},
-            "completions": {"soldier": self.scompletions, "demoman": self.dcompletions},
+            "completions": {
+                "soldier": self.s_completions, 
+                "demoman": self.d_completions
+            },
         }
 
 
 class Author(db.Model):
-    authorid = db.Column("id", db.Integer, primary_key=True)
-    name = db.Column("name", db.String(32), nullable=False)
-    playerid = db.Column("playerid", None, db.ForeignKey("player.id"), nullable=True)
-    mapid = db.Column("mapid", None, db.ForeignKey("map.id"), nullable=False)
+    id_ = db.Column("id", db.Integer, primary_key=True)
+    name = db.Column(db.String(32), nullable=False)
+    player_id = db.Column(None, db.ForeignKey("player.id"), nullable=True)
+    map_id = db.Column(None, db.ForeignKey("map.id"), nullable=False)
 
     @property
     def serialize(self):
         player = Player.query.filter_by(playerid=playerid).first()
         if player:
-            player_json = player.serialize()
-            del player_json["rank_info"]
-            player_json["name"] = self.name
-            return player_json
+            player_dict = player.serialize()
+            del player_dict["rank_info"]
+            player_dict["name"] = self.name
+            return player_dict
         else:
             return {"name": self.name}
 
 
 class Course(db.Model):
-    courseid = db.Column("id", db.Integer, primary_key=True)
-    mapid = db.Column("mapid", None, db.ForeignKey("map.id"), nullable=False)
-    courseindex = db.Column("courseindex", db.Integer, nullable=False)
-    stier = db.Column("stier", db.Integer, default=0, nullable=False)
-    dtier = db.Column("dtier", db.Integer, default=0, nullable=False)
-    completions = db.Column("completions", db.Integer, default=0, nullable=False)
-    startzone = db.Column("startzone", None, db.ForeignKey("zone.id"), nullable=False)
-    endzone = db.Column("endzone", None, db.ForeignKey("zone.id"), nullable=False)
+    id_ = db.Column("id", db.Integer, primary_key=True)
+    map_id = db.Column(None, db.ForeignKey("map.id"), nullable=False)
+    course_index = db.Column(db.Integer, nullable=False)
+    stier = db.Column(db.Integer, default=0, nullable=False)
+    dtier = db.Column(db.Integer, default=0, nullable=False)
+    s_completions = db.Column(db.Integer, default=0, nullable=False)
+    d_completions = db.Column(db.Integer, default=0, nullable=False)
+    start_zone = db.Column(None, db.ForeignKey("zone.id"), nullable=False)
+    end_zone = db.Column(None, db.ForeignKey("zone.id"), nullable=False)
 
 
 class Bonus(db.Model):
-    bonusid = db.Column("id", db.Integer, primary_key=True)
-    mapid = db.Column("mapid", None, db.ForeignKey("map.id"), nullable=False)
-    bonusindex = db.Column("bonusindex", db.Integer, nullable=False)
-    stier = db.Column("stier", db.Integer, default=0, nullable=False)
-    dtier = db.Column("dtier", db.Integer, default=0, nullable=False)
-    completions = db.Column("completions", db.Integer, default=0, nullable=False)
-    startzone = db.Column("startzone", None, db.ForeignKey("zone.id"), nullable=False)
-    endzone = db.Column("endzone", None, db.ForeignKey("zone.id"), nullable=False)
+    id_ = db.Column("id", db.Integer, primary_key=True)
+    map_id = db.Column(None, db.ForeignKey("map.id"), nullable=False)
+    bonus_index = db.Column(db.Integer, nullable=False)
+    stier = db.Column(db.Integer, default=0, nullable=False)
+    dtier = db.Column(db.Integer, default=0, nullable=False)
+    s_completions = db.Column(db.Integer, default=0, nullable=False)
+    d_completions = db.Column(db.Integer, default=0, nullable=False)
+    start_zone = db.Column(None, db.ForeignKey("zone.id"), nullable=False)
+    end_zone = db.Column(None, db.ForeignKey("zone.id"), nullable=False)
 
 
 class MapCheckpoint(db.Model):
-    checkpointid = db.Column("id", db.Integer, primary_key=True)
-    zoneid = db.Column("zoneid", None, db.ForeignKey("zone.id"), nullable=False)
-    mapid = db.Column("mapid", None, db.ForeignKey("map.id"), nullable=False)
-    cpindex = db.Column("cpindex", db.Integer, nullable=False)
+    id_ = db.Column("id", db.Integer, primary_key=True)
+    zone_id = db.Column(None, db.ForeignKey("zone.id"), nullable=False)
+    map_id = db.Column(None, db.ForeignKey("map.id"), nullable=False)
+    cp_index = db.Column(db.Integer, nullable=False)
 
 
 class CourseCheckpoint(db.Model):
-    checkpointid = db.Column("id", db.Integer, primary_key=True)
-    zoneid = db.Column("zoneid", None, db.ForeignKey("zone.id"), nullable=False)
-    courseid = db.Column("courseid", None, db.ForeignKey("course.id"), nullable=False)
-    cpindex = db.Column("cpindex", db.Integer, nullable=False)
+    id_ = db.Column("id", db.Integer, primary_key=True)
+    zone_id = db.Column(None, db.ForeignKey("zone.id"), nullable=False)
+    course_id = db.Column(None, db.ForeignKey("course.id"), nullable=False)
+    cp_index = db.Column(db.Integer, nullable=False)
 
 
 class BonusCheckpoint(db.Model):
-    checkpointid = db.Column("id", db.Integer, primary_key=True)
-    zoneid = db.Column("zoneid", None, db.ForeignKey("zone.id"), nullable=False)
-    bonusid = db.Column("bonusid", None, db.ForeignKey("bonus.id"), nullable=False)
-    cpindex = db.Column("cpindex", db.Integer, nullable=False)
+    id_ = db.Column("id", db.Integer, primary_key=True)
+    zone_id = db.Column(None, db.ForeignKey("zone.id"), nullable=False)
+    bonus_id = db.Column(None, db.ForeignKey("bonus.id"), nullable=False)
+    cp_index = db.Column(db.Integer, nullable=False)
+
+
+class MapTimes(db.Model):
+    id_ = db.Column("id", db.Integer, primary_key=True)
+    map_id = db.Column(None, db.ForeignKey("map.id"), nullable=False)
+    player_id = db.Column(None, db.ForeignKey("player.id"), nullable=False)
+    player_class = db.Column(db.Integer, nullable=False)
+    start_time = db.Column(db.Double, nullable=False)
+    end_time = db.Column(db.Double, nullable=False)
+    rank = db.Column(db.Integer, nullable=False)
+
+
+class CourseTimes(db.Model):
+    id_ = db.Column("id", db.Integer, primary_key=True)
+    course_id = db.Column(None, db.ForeignKey("course.id"), nullable=False)
+    player_id = db.Column(None, db.ForeignKey("player.id"), nullable=False)
+    player_class = db.Column(db.Integer, nullable=False)
+    start_time = db.Column(db.Double, nullable=False)
+    end_time = db.Column(db.Double, nullable=False)
+    rank = db.Column(db.Integer, nullable=False)
+
+
+class BonusTimes(db.Model):
+    id_ = db.Column("id", db.Integer, primary_key=True)
+    bonus_id = db.Column(None, db.ForeignKey("bonus.id"), nullable=False)
+    player_id = db.Column(None, db.ForeignKey("player.id"), nullable=False)
+    player_class = db.Column(db.Integer, nullable=False)
+    start_time = db.Column(db.Double, nullable=False)
+    end_time = db.Column(db.Double, nullable=False)
+    rank = db.Column(db.Integer, nullable=False)
+
+
+class MapCheckpointTimes(db.Model):
+    id_ = db.Column("id", db.Integer, primary_key=True)
+    checkpoint_id = db.Column(None, db.ForeignKey("map_checkpoint.id"), nullable=False)
+    time_id = db.Column(None, db.ForeignKey("map_times.id"), nullable=False)
+    time = db.Column(db.Double, nullable=False)
+
+
+class CourseCheckpointTimes(db.Model):
+    id_ = db.Column("id", db.Integer, primary_key=True)
+    checkpoint_id = db.Column(None, db.ForeignKey("course_checkpoint.id"), nullable=False)
+    time_id = db.Column(None, db.ForeignKey("course_times.id"), nullable=False)
+    time = db.Column(db.Double, nullable=False)
+
+
+class MapCheckpointTimes(db.Model):
+    id_ = db.Column("id", db.Integer, primary_key=True)
+    checkpoint_id = db.Column(None, db.ForeignKey("bonus_checkpoint.id"), nullable=False)
+    time_id = db.Column(None, db.ForeignKey("bonus_times.id"), nullable=False)
+    time = db.Column(db.Double, nullable=False)
 
 
 class User(db.Model):
     """Model for authenticating restricted views"""
 
-    userid = db.Column("id", db.Integer, primary_key=True)
+    id_ = db.Column("id", db.Integer, primary_key=True)
     username = db.Column("username", db.String(64), nullable=False)
     password = db.Column("password", db.String(256), nullable=False)
 
@@ -140,7 +199,7 @@ class User(db.Model):
 class RevokedToken(db.Model):
     """Model for storing revoked tokens"""
 
-    tokenid = db.Column("tokenid", db.Integer, primary_key=True)
+    id_ = db.Column("id", db.Integer, primary_key=True)
     jti = db.Column("jti", db.String(120), nullable=False)
 
     def add(self):
