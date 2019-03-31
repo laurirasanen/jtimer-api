@@ -35,6 +35,14 @@ class Zone(db.Model):
     y2 = db.Column(db.Integer, nullable=False)
     z2 = db.Column(db.Integer, nullable=False)
 
+    @property
+    def serialize(self):
+        return {
+            "id": self.id_,
+            "p1": [self.x1, self.y1, self.z1],
+            "p2": [self.x2, self.y2, self.z2],
+        }
+
     def add(self):
         query = Zone.query.filter_by(id_=self.id_).first()
         if not query:
@@ -121,6 +129,21 @@ class MapCheckpoint(db.Model):
     zone_id = db.Column(None, db.ForeignKey("zone.id"), nullable=False)
     map_id = db.Column(None, db.ForeignKey("map.id"), nullable=False)
     cp_index = db.Column(db.Integer, nullable=False)
+
+    @property
+    def serialize(self):
+        zone = Zone.query.filter_by(id_=self.zone_id).first()
+        zone_dict = None
+        if zone:
+            zone_dict = zone.serialize()
+
+        return {
+            "id": self.id_,
+            "zone_type": "cp",
+            "map_id": self.map_id,
+            "cp_index": self.cp_index,
+            "zone": zone_dict,
+        }
 
     def add(self):
         query = MapCheckpoint.query.filter_by(id_=self.id_).first()

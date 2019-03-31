@@ -5,6 +5,60 @@ from jtimer.models.database import Zone, Map, MapCheckpoint
 from flask_jwt_extended import jwt_required
 
 
+@zones_index.route("/map/<int:map_id>", methods=["GET"])
+def get_map_zones():
+    """Get map zones.
+
+    .. :quickref: Zones; Get map zones.
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+      GET /zones/map/1 HTTP/1.1
+    
+    **Example response**:
+
+    .. sourcecode:: json
+
+      {
+          "message": "zone added."
+      }
+    
+    :query map_id: map id.
+    
+    :status 200: Success.
+    :status 404: Map not found.
+
+    :returns: List of zones
+    """
+
+    map_ = Map.query.filter_by(id_=map_id).first()
+    if map_ is None:
+        error = {"message": "Map not found."}
+        return make_response(jsonify(error), 404)
+
+    zones = []
+    if map_.start_zone != None:
+        zone = Zone.query.filter_by(id_=map_.start_zone).first()
+        if zone:
+            zone_dict = zone.serialize()
+            zone_dict["zone_type"] = "start"
+
+    if map_.end_zone != None:
+        zone = Zone.query.filter_by(id_=map_.end_zone).first()
+        if zone:
+            zone_dict = zone.serialize()
+            zone_dict["zone_type"] = "end"
+
+    checkpoints = MapCheckpoint.query.filter_by(map_id=map_id).all()
+    if checkpoints:
+        for cp in checkpoints:
+            zones.append(cp.serialize())
+
+    return make_response(jsonify(zones), 200)
+
+
 @zones_index.route("/add/map/<int:map_id>", methods=["POST"])
 @jwt_required
 def add_map_zone():
@@ -42,7 +96,8 @@ def add_map_zone():
     :status 404: Map not found.
     :status 415: Missing 'Content-Type: application/json' header.
     :status 422: Missing or invalid json content.
-    :returns: Insert result
+
+    :returns: Zone add result
     """
 
     if not request.is_json:
