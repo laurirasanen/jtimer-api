@@ -125,8 +125,8 @@ class MapTimes(db.Model):
     map_id = db.Column(None, db.ForeignKey("map.id"), nullable=False)
     player_id = db.Column(None, db.ForeignKey("player.id"), nullable=False)
     player_class = db.Column(db.Integer, nullable=False)
-    start_time = db.Column(db.Double, nullable=False)
-    end_time = db.Column(db.Double, nullable=False)
+    start_time = db.Column(db.Float(precision=53), nullable=False)
+    end_time = db.Column(db.Float(precision=53), nullable=False)
     rank = db.Column(db.Integer, nullable=False)
 
     @property
@@ -157,8 +157,8 @@ class CourseTimes(db.Model):
     course_id = db.Column(None, db.ForeignKey("course.id"), nullable=False)
     player_id = db.Column(None, db.ForeignKey("player.id"), nullable=False)
     player_class = db.Column(db.Integer, nullable=False)
-    start_time = db.Column(db.Double, nullable=False)
-    end_time = db.Column(db.Double, nullable=False)
+    start_time = db.Column(db.Float(precision=53), nullable=False)
+    end_time = db.Column(db.Float(precision=53), nullable=False)
     rank = db.Column(db.Integer, nullable=False)
 
 
@@ -167,8 +167,8 @@ class BonusTimes(db.Model):
     bonus_id = db.Column(None, db.ForeignKey("bonus.id"), nullable=False)
     player_id = db.Column(None, db.ForeignKey("player.id"), nullable=False)
     player_class = db.Column(db.Integer, nullable=False)
-    start_time = db.Column(db.Double, nullable=False)
-    end_time = db.Column(db.Double, nullable=False)
+    start_time = db.Column(db.Float(precision=53), nullable=False)
+    end_time = db.Column(db.Float(precision=53), nullable=False)
     rank = db.Column(db.Integer, nullable=False)
 
 
@@ -176,7 +176,7 @@ class MapCheckpointTimes(db.Model):
     id_ = db.Column("id", db.Integer, primary_key=True)
     checkpoint_id = db.Column(None, db.ForeignKey("map_checkpoint.id"), nullable=False)
     time_id = db.Column(None, db.ForeignKey("map_times.id"), nullable=False)
-    time = db.Column(db.Double, nullable=False)
+    time = db.Column(db.Float(precision=53), nullable=False)
 
 
 class CourseCheckpointTimes(db.Model):
@@ -185,16 +185,16 @@ class CourseCheckpointTimes(db.Model):
         None, db.ForeignKey("course_checkpoint.id"), nullable=False
     )
     time_id = db.Column(None, db.ForeignKey("course_times.id"), nullable=False)
-    time = db.Column(db.Double, nullable=False)
+    time = db.Column(db.Float(precision=53), nullable=False)
 
 
-class MapCheckpointTimes(db.Model):
+class BonusCheckpointTimes(db.Model):
     id_ = db.Column("id", db.Integer, primary_key=True)
     checkpoint_id = db.Column(
         None, db.ForeignKey("bonus_checkpoint.id"), nullable=False
     )
     time_id = db.Column(None, db.ForeignKey("bonus_times.id"), nullable=False)
-    time = db.Column(db.Double, nullable=False)
+    time = db.Column(db.Float(precision=53), nullable=False)
 
 
 class User(db.Model):

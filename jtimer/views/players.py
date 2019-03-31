@@ -56,9 +56,7 @@ def list_players():
     limit = max(1, min(limit, 50))
     start = max(1, start)
 
-    players = Player.query.filter(Player.playerid >= start).order_by(Player.playerid)[
-        :limit
-    ]
+    players = Player.query.filter(Player.id_ >= start).order_by(Player.id_)[:limit]
 
     if players is None:
         return make_response("", 204)
@@ -76,7 +74,7 @@ def find_player():
 
     .. sourcecode:: http
     
-      GET /players/search?playerid=1 HTTP/1.1
+      GET /players/search?player_id=1 HTTP/1.1
     
     **Example response**:
 
@@ -94,8 +92,8 @@ def find_player():
           "steamid": "STEAM_1:1:50152141"
       }
     
-    :query playerid: the playerid to search for.
-    :query steamid: the steamid to search for.
+    :query player_id: the playerid to search for.
+    :query steam_id: the steamid to search for.
     :query name: the name to search for.
 
     **Note**: If multiple parameters are supplied, only one of them will be used.
@@ -105,13 +103,13 @@ def find_player():
     :status 204: no player found.
     :returns: Player
     """
-    playerid = request.args.get("playerid", default=None, type=int)
-    steamid = request.args.get("steamid", default=None, type=str)
+    playerid = request.args.get("player_id", default=None, type=int)
+    steamid = request.args.get("steam_id", default=None, type=str)
     name = request.args.get("name", default=None, type=str)
 
-    player = Player.query.filter_by(playerid=playerid).first()
+    player = Player.query.filter_by(id_=player_id).first()
     if player is None:
-        player = Player.query.filter_by(steamid=steamid).first()
+        player = Player.query.filter_by(steam_id=steam_id).first()
     if player is None:
         player = Player.query.filter_by(username=name).first()
 

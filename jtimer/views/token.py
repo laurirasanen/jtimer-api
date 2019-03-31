@@ -23,6 +23,7 @@ def token_auth():
     **Example request**:
 
     .. sourcecode:: http   
+    
       POST /token/auth HTTP/1.1
       Content-Type: application/json
       { 
