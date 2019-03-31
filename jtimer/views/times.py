@@ -68,9 +68,9 @@ def get_times(map_id):
 @times_index.route("/insert/map/<int:map_id>")
 @jwt_required
 def insert_map(map_id):
-    """Get map times with id.
+    """Insert run to map with id.
 
-    .. :quickref: Times; Get map times.
+    .. :quickref: Times; Insert map time.
 
     **Example request**:
 
