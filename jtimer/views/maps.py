@@ -54,11 +54,11 @@ def map_info(map_id):
         response = {"message": "Map not found."}
         return make_response(jsonify(response), 404)
 
-    response = m.serialize()
+    response = m.json
     response["authors"] = []
     if authors is not None:
         for a in authors:
-            response["authors"].append(a.serialize())
+            response["authors"].append(a.json)
 
     return make_response(jsonify(response), 200)
 
@@ -113,11 +113,11 @@ def map_info_name(mapname):
 
     authors = Author.query.filter_by(id_=m.id_).all()
 
-    response = m.serialize()
+    response = m.json
     response["authors"] = []
     if authors is not None:
         for a in authors:
-            response["authors"].append(a.serialize())
+            response["authors"].append(a.json)
 
     return make_response(jsonify(response), 200)
 
@@ -338,7 +338,7 @@ def update(map_id):
     map_.add()
     response = {
         "message": "map updated!",
-        "map_id": map_.id,
+        "map_id": map_.id_,
         "name": map_.mapname,
         "stier": map_.stier,
         "dtier": map_.dtier,

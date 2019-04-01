@@ -54,7 +54,7 @@ def get_times(map_id):
     start = max(1, start)
 
     times = (
-        MapTimes.query.filter(MapTimes.id_ == map_id and MapTimes.rank >= start)
+        MapTimes.query.filter(MapTimes.id_ == map_id, MapTimes.rank >= start)
         .order_by(MapTimes.rank)
         .all()[:limit]
     )
@@ -62,7 +62,7 @@ def get_times(map_id):
     if times is None:
         return make_response("", 204)
     else:
-        return make_response(jsonify([t.serialize for t in times]), 200)
+        return make_response(jsonify([t.json for t in times]), 200)
 
 
 @times_index.route("/insert/map/<int:map_id>")

@@ -13,7 +13,7 @@ class Player(db.Model):
     d_points = db.Column(db.Integer, default=0, nullable=False)
 
     @property
-    def serialize(self):
+    def json(self):
         return {
             "id": self.id_,
             "steamid": self.steamid,
@@ -36,7 +36,7 @@ class Zone(db.Model):
     z2 = db.Column(db.Integer, nullable=False)
 
     @property
-    def serialize(self):
+    def json(self):
         return {
             "id": self.id_,
             "p1": [self.x1, self.y1, self.z1],
@@ -61,7 +61,7 @@ class Map(db.Model):
     end_zone = db.Column(None, db.ForeignKey("zone.id"), default=None)
 
     @property
-    def serialize(self):
+    def json(self):
         return {
             "id": self.id_,
             "name": self.mapname,
@@ -89,10 +89,10 @@ class Author(db.Model):
     map_id = db.Column(None, db.ForeignKey("map.id"), nullable=False)
 
     @property
-    def serialize(self):
+    def json(self):
         player = Player.query.filter_by(playerid=playerid).first()
         if player:
-            player_dict = player.serialize()
+            player_dict = player.json
             del player_dict["rank_info"]
             player_dict["name"] = self.name
             return player_dict
@@ -131,11 +131,11 @@ class MapCheckpoint(db.Model):
     cp_index = db.Column(db.Integer, nullable=False)
 
     @property
-    def serialize(self):
+    def json(self):
         zone = Zone.query.filter_by(id_=self.zone_id).first()
         zone_dict = None
         if zone:
-            zone_dict = zone.serialize()
+            zone_dict = zone.json
 
         return {
             "id": self.id_,
@@ -178,7 +178,7 @@ class MapTimes(db.Model):
     points = db.Column(db.Integer, nullable=True)
 
     @property
-    def serialize(self):
+    def json(self):
         player = Player.query.filter_by(id_=self.player_id).first()
         if player is None:
             return {
@@ -193,7 +193,7 @@ class MapTimes(db.Model):
             return {
                 "id": self.id_,
                 "map_id": self.map_id,
-                "player": player.serialize(),
+                "player": player.json,
                 "class": self.player_class,
                 "time": self.end_time - self.start_time,
                 "rank": self.rank,

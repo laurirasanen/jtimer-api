@@ -6,7 +6,7 @@ from flask_jwt_extended import jwt_required
 
 
 @zones_index.route("/map/<int:map_id>", methods=["GET"])
-def get_map_zones():
+def get_map_zones(map_id):
     """Get map zones.
 
     .. :quickref: Zones; Get map zones.
@@ -63,29 +63,30 @@ def get_map_zones():
     zones = []
     if map_.start_zone != None:
         zone = Zone.query.filter_by(id_=map_.start_zone).first()
+
         if zone:
-            zone_dict = zone.serialize()
+            zone_dict = zone.json
             zone_dict["zone_type"] = "start"
             zones.append(zone_dict)
 
     if map_.end_zone != None:
         zone = Zone.query.filter_by(id_=map_.end_zone).first()
         if zone:
-            zone_dict = zone.serialize()
+            zone_dict = zone.json
             zone_dict["zone_type"] = "end"
             zones.append(zone_dict)
 
     checkpoints = MapCheckpoint.query.filter_by(map_id=map_id).all()
     if checkpoints:
         for cp in checkpoints:
-            zones.append(cp.serialize())
+            zones.append(cp.json)
 
     return make_response(jsonify(zones), 200)
 
 
 @zones_index.route("/add/map/<int:map_id>", methods=["POST"])
 @jwt_required
-def add_map_zone():
+def add_map_zone(map_id):
     """Add zone to a map.
 
     .. :quickref: Zones; Add zone to a map.
@@ -188,9 +189,7 @@ def add_map_zone():
 
     if zone_type == "start":
         # check for existing start zone
-        zone = Zone.query.filter(
-            Zone.map_id == map_id and Zone.id_ == map_.start_zone
-        ).first()
+        zone = Zone.query.filter(Zone.id_ == map_.start_zone).first()
         if zone is None:
             zone = Zone(x1=p1[0], y1=p1[1], z1=p1[2], x2=p2[0], y2=p2[1], z2=p2[2])
         zone.add()
@@ -199,9 +198,7 @@ def add_map_zone():
 
     elif zone_type == "end":
         # check for existing end zone
-        zone = Zone.query.filter(
-            Zone.map_id == map_id and Zone.id_ == map_.end_zone
-        ).first()
+        zone = Zone.query.filter(Zone.id_ == map_.end_zone).first()
         if zone is None:
             zone = Zone(x1=p1[0], y1=p1[1], z1=p1[2], x2=p2[0], y2=p2[1], z2=p2[2])
         zone.add()
@@ -215,10 +212,28 @@ def add_map_zone():
             error = {"message": "Missing index for zone_type 'cp'."}
             return make_response(jsonify(error), 422)
 
-        zone = Zone(x1=p1[0], y1=p1[1], z1=p1[2], x2=p2[0], y2=p2[1], z2=p2[2])
-        zone.add()
-        cp = MapCheckpoint(map_id=map_id, zone_id=zone.id_, cp_index=index)
+        # check for existing checkpoint
+        cp = MapCheckpoint.query.filter(
+            MapCheckpoint.map_id == map_id, MapCheckpoint.cp_index == index
+        ).first()
+        if cp is None:
+            zone = Zone(x1=p1[0], y1=p1[1], z1=p1[2], x2=p2[0], y2=p2[1], z2=p2[2])
+            zone.add()
+            cp = MapCheckpoint(map_id=map_id, zone_id=zone.id_, cp_index=index)
+        else:
+            # check for existing zone
+            zone = Zone.query.filter_by(id_=cp.zone_id).first()
+            if zone is None:
+                zone = Zone(x1=p1[0], y1=p1[1], z1=p1[2], x2=p2[0], y2=p2[1], z2=p2[2])
+            else:
+                zone.x1 = p1[0]
+                zone.y1 = p1[1]
+                zone.z1 = p1[2]
+                zone.x2 = p2[0]
+                zone.y2 = p2[1]
+                zone.z2 = p2[2]
+            zone.add()
         cp.add()
 
     response = {"message": "zone added."}
-    make_response(jsonify(response), 200)
+    return make_response(jsonify(response), 200)

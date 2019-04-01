@@ -61,7 +61,7 @@ def list_players():
     if players is None:
         return make_response("", 204)
     else:
-        return make_response(jsonify([p.serialize for p in players]), 200)
+        return make_response(jsonify([p.json for p in players]), 200)
 
 
 @players_index.route("/search")
@@ -116,4 +116,4 @@ def find_player():
     if player is None:
         return make_response("", 204)
     else:
-        return make_response(jsonify(player.serialize), 200)
+        return make_response(jsonify(player.json), 200)
