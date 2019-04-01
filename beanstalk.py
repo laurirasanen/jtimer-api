@@ -8,7 +8,7 @@ config = ConfigParser()
 config.read("./jtimer/config/info.ini")
 version = config.get("root", "version", fallback=None)
 
-files = ["application.py", "setup.py", "requirements.txt", "jtimer"]
+files = ["application.py", "setup.py", "requirements.txt", "jtimer", ".ebextensions"]
 
 output = f"jtimer-api-{version}.zip"
 
