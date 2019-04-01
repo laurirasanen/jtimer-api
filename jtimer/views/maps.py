@@ -63,6 +63,65 @@ def map_info(map_id):
     return make_response(jsonify(response), 200)
 
 
+@maps_index.route("/name/<str:mapname>", methods=["GET"])
+def map_info(map_id):
+    """Get map by name.
+
+    .. :quickref: Maps; Get map by name.
+
+    **Example request**:
+
+    .. sourcecode:: http   
+
+      POST /maps/name/jump_soar_a4 HTTP/1.1
+    
+    **Example response**:
+
+    .. sourcecode:: json
+    
+      {
+          "id": 1,
+          "name": "jump_soar_a4",
+          "tiers": {
+              "soldier": 5,
+              "demoman": 3
+          },
+          "completions": {
+              "soldier": 1402,
+              "demoman": 2401
+          },
+          "authors": [
+              {
+                  "id": 5,
+                  "name": "Matti",
+                  "country": "UK"
+              }
+          ]
+      }
+    
+    :query mapname: map name.
+    
+    :status 200: Success.
+    :status 404: Map not found.
+    :returns: Map info
+    """
+    m = Map.query.filter_by(mapname=mapname).first()
+
+    if m is None:
+        response = {"message": "Map not found."}
+        return make_response(jsonify(response), 404)
+
+    authors = Author.query.filter_by(id_=m.id_).all()
+
+    response = m.serialize()
+    response["authors"] = []
+    if authors is not None:
+        for a in authors:
+            response["authors"].append(a.serialize())
+
+    return make_response(jsonify(response), 200)
+
+
 @maps_index.route("/add", methods=["POST"])
 @jwt_required
 def add_map():
