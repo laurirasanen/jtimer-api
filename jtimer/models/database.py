@@ -57,8 +57,8 @@ class Map(db.Model):
     dtier = db.Column(db.Integer, default=0, nullable=False)
     s_completions = db.Column(db.Integer, default=0, nullable=False)
     d_completions = db.Column(db.Integer, default=0, nullable=False)
-    start_zone = db.Column(None, db.ForeignKey("zone.id"), nullable=True)
-    end_zone = db.Column(None, db.ForeignKey("zone.id"), nullable=True)
+    start_zone = db.Column(None, db.ForeignKey("zone.id"), default=None)
+    end_zone = db.Column(None, db.ForeignKey("zone.id"), default=None)
 
     @property
     def serialize(self):
@@ -74,7 +74,7 @@ class Map(db.Model):
 
     def add(self):
         query = Map.query.filter(
-            Map.mapname == self.name or Map.id_ == self.id_
+            Map.mapname == self.mapname or Map.id_ == self.id_
         ).first()
         if not query:
             db.session.add(self)
@@ -108,8 +108,8 @@ class Course(db.Model):
     dtier = db.Column(db.Integer, default=0, nullable=False)
     s_completions = db.Column(db.Integer, default=0, nullable=False)
     d_completions = db.Column(db.Integer, default=0, nullable=False)
-    start_zone = db.Column(None, db.ForeignKey("zone.id"), nullable=False)
-    end_zone = db.Column(None, db.ForeignKey("zone.id"), nullable=False)
+    start_zone = db.Column(None, db.ForeignKey("zone.id"), default=None)
+    end_zone = db.Column(None, db.ForeignKey("zone.id"), default=None)
 
 
 class Bonus(db.Model):
@@ -120,8 +120,8 @@ class Bonus(db.Model):
     dtier = db.Column(db.Integer, default=0, nullable=False)
     s_completions = db.Column(db.Integer, default=0, nullable=False)
     d_completions = db.Column(db.Integer, default=0, nullable=False)
-    start_zone = db.Column(None, db.ForeignKey("zone.id"), nullable=False)
-    end_zone = db.Column(None, db.ForeignKey("zone.id"), nullable=False)
+    start_zone = db.Column(None, db.ForeignKey("zone.id"), default=None)
+    end_zone = db.Column(None, db.ForeignKey("zone.id"), default=None)
 
 
 class MapCheckpoint(db.Model):

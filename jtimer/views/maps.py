@@ -304,7 +304,7 @@ def update(map_id):
     # dtier validation
     dtier = data.get("dtier")
     if dtier is not None:
-        if not isinstance(diter, int):
+        if not isinstance(dtier, int):
             error = {"message": "dtier is not type of int."}
             return make_response(jsonify(error), 422)
 
