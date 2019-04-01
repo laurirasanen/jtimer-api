@@ -63,8 +63,8 @@ def map_info(map_id):
     return make_response(jsonify(response), 200)
 
 
-@maps_index.route("/name/<str:mapname>", methods=["GET"])
-def map_info(map_id):
+@maps_index.route("/name/<string:mapname>", methods=["GET"])
+def map_info_name(mapname):
     """Get map by name.
 
     .. :quickref: Maps; Get map by name.
