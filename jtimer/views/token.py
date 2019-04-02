@@ -12,9 +12,16 @@ from flask_jwt_extended import (
 
 from jtimer.blueprints import token_index
 from jtimer.models.database import User, RevokedToken
+from jtimer.validation import validate_json
 
 
 @token_index.route("/auth", methods=["POST"])
+@validate_json(
+    {
+        "username": {"type": "string", "empty": False},
+        "password": {"type": "string", "empty": False},
+    }
+)
 def token_auth():
     """Get access and refresh tokens with user credentials.
     This should only be used for the initial authentication.
@@ -55,29 +62,10 @@ def token_auth():
     :returns: Refresh token, access token, expiry times
     """
 
-    if not request.is_json:
-        error = {"message": "Missing 'Content-Type: application/json' header."}
-        return make_response(jsonify(error), 415)
-
     data = request.get_json()
 
-    if data is None:
-        error = {"message": "Missing json content"}
-        return make_response(jsonify(error), 422)
-
-    username = None
-    if "username" in data.keys():
-        username = data["username"]
-    else:
-        error = {"message": "Missing username"}
-        return make_response(jsonify(error), 422)
-
-    password = None
-    if "password" in data.keys():
-        password = data["password"]
-    else:
-        error = {"message": "Missing password"}
-        return make_response(jsonify(error), 422)
+    username = data.get("username")
+    password = data.get("password")
 
     user = User.query.filter_by(username=username).first()
 

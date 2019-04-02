@@ -4,9 +4,17 @@ from flask import jsonify, make_response, request
 
 from jtimer.blueprints import user_index
 from jtimer.models.database import User
+from jtimer.validation import validate_json
 
 
 @user_index.route("/changepassword", methods=["POST"])
+@validate_json(
+    {
+        "username": {"type": "string", "empty": False},
+        "password": {"type": "string", "empty": False},
+        "newpassword": {"type": "string", "empty": False, "maxlength": 72},
+    }
+)
 def change_password():
     """Change user password.
 
@@ -42,36 +50,11 @@ def change_password():
     :status 422: Missing json content.
     """
 
-    if not request.is_json:
-        error = {"message": "Missing 'Content-Type: application/json' header."}
-        return make_response(jsonify(error), 415)
-
     data = request.get_json()
 
-    if data is None:
-        error = {"message": "Missing json data"}
-        return make_response(jsonify(error), 422)
-
-    username = None
-    if "username" in data.keys():
-        username = data["username"]
-    else:
-        error = {"message": "Missing username"}
-        return make_response(jsonify(error), 422)
-
-    password = None
-    if "password" in data.keys():
-        password = data["password"]
-    else:
-        error = {"message": "Missing password"}
-        return make_response(jsonify(error), 422)
-
-    newpassword = None
-    if "newpassword" in data.keys():
-        newpassword = data["newpassword"]
-    else:
-        error = {"message": "Missing newpassword"}
-        return make_response(jsonify(error), 422)
+    username = data.get("username")
+    password = data.get("password")
+    newpassword = data.get("newpassword")
 
     user = User.query.filter_by(username=username).first()
 

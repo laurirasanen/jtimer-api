@@ -1,9 +1,56 @@
-"""json validation"""
+"""json validation with cerberus schemas"""
 
 from functools import wraps
 
 from flask import jsonify, make_response, request
 from cerberus import Validator
+
+
+class ExtendedValidator(Validator):
+    """Extend cerberus validator"""
+
+    def _validate_required_if(self, required_if, field, _value):
+        # type: (Tuple[str, Any], str, Any) -> Optional[bool]
+        """Require field if another field in the document has specified value
+
+        The rule's arguments are validated against this schema:
+        {'type': 'list'}
+        """
+        key, value = required_if
+
+        # if target key doesn't exist, not required
+        if key not in self.document:
+            return True
+
+        # target key value is not what we specified, not required
+        if self.document[key] != value:
+            return True
+
+        # required and we have a value
+        if _value:
+            return True
+
+        # required and no value
+        self._error(field, f"required field when {key} is {value}")
+
+    def validate(self, document, schema=None, update=False, normalize=True):
+        super().validate(document, schema, update, normalize)
+
+        # Make cerberus check against required_if rules when values are missing from request.
+        for field, definition in schema.items():
+            value = self.document.get(field)
+
+            # has value, was checked by cerberus
+            if value != None:
+                continue
+
+            required_if = self._resolve_rules_set(definition).get("required_if")
+            if required_if is not None:
+                self._validate_required_if(required_if, field, value)
+
+        self.error_handler.end(self)
+
+        return not bool(self._errors)
 
 
 def validate_json(schema):
@@ -26,7 +73,7 @@ def validate_json(schema):
                 return make_response(jsonify(response), 422)
 
             # If valid, run view function
-            validator = Validator()
+            validator = ExtendedValidator()
             if validator.validate(document, schema):
                 return view_function(**kwargs)
 

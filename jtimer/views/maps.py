@@ -126,6 +126,25 @@ def map_info_name(mapname):
 
 
 @maps_index.route("/add", methods=["POST"])
+@validate_json(
+    {
+        "name": {"type": "string", "maxlength": 128, "empty": False, "required": True},
+        "stier": {
+            "type": "integer",
+            "min": 0,
+            "max": 10,
+            "required": False,
+            "default": 0,
+        },
+        "dtier": {
+            "type": "integer",
+            "min": 0,
+            "max": 10,
+            "required": False,
+            "default": 0,
+        },
+    }
+)
 @jwt_required
 def add_map():
     """Add a new map.
@@ -163,64 +182,13 @@ def add_map():
     :returns: Map added result.
     """
 
-    if not request.is_json:
-        error = {"message": "Missing 'Content-Type: application/json' header."}
-        return make_response(jsonify(error), 415)
-
     data = request.get_json()
 
-    if data is None:
-        error = {"message": "Missing json content"}
-        return make_response(jsonify(error), 422)
-
-    # name validation
-    name = data.get("name")
-    if name is None:
-        error = {"message": "Missing name."}
-        return make_response(jsonify(error), 422)
-
-    if not isinstance(name, str):
-        error = {"message": "name is not type of str."}
-        return make_response(jsonify(error), 422)
-
-    if len(name) > 128:
-        error = {"message": "name is too long. Max length: 128."}
-        return make_response(jsonify(error), 422)
-
-    # stier validation
     stier = data.get("stier")
-    if stier is not None:
-        if not isinstance(stier, int):
-            error = {"message": "stier is not type of int."}
-            return make_response(jsonify(error), 422)
-
-        if stier < 0:
-            error = {"message": "stier is negative."}
-            return make_response(jsonify(error), 422)
-
-        if stier > 10:
-            error = {"message": "stier is too big. Max value: 10"}
-            return make_response(jsonify(error), 422)
-    else:
-        stier = 0
-
-    # dtier validation
     dtier = data.get("dtier")
-    if dtier is not None:
-        if not isinstance(dtier, int):
-            error = {"message": "dtier is not type of int."}
-            return make_response(jsonify(error), 422)
+    name = data.get("name")
 
-        if dtier < 0:
-            error = {"message": "dtier is negative."}
-            return make_response(jsonify(error), 422)
-
-        if dtier > 10:
-            error = {"message": "dtier is too big.  Max value: 10"}
-            return make_response(jsonify(error), 422)
-    else:
-        dtier = 0
-
+    # check if map name is already taken
     query = Map.query.filter_by(mapname=name).first()
     if query:
         error = {
@@ -237,7 +205,7 @@ def add_map():
 @maps_index.route("/update/<int:map_id>", methods=["POST"])
 @validate_json(
     {
-        "name": {"type": "string", "maxlength": 128, "required": False},
+        "name": {"type": "string", "maxlength": 128, "empty": False, "required": False},
         "stier": {"type": "integer", "min": 0, "max": 10, "required": False},
         "dtier": {"type": "integer", "min": 0, "max": 10, "required": False},
     }
@@ -290,20 +258,21 @@ def update(map_id):
         response = {"message": "Map not found."}
         return make_response(jsonify(response), 404)
 
-    if "stier" is not data.keys():
-        map_.stier = data["stier"]
+    if data.get("stier"):
+        map_.stier = data.get("stier")
 
-    if "dtier" in data.keys():
-        map_.dtier = data["dtier"]
+    if data.get("dtier"):
+        map_.dtier = data.get("dtier")
 
     # check if updated name is already taken
-    if "name" in data.keys():
-        query = Map.query.filter_by(mapname=data["name"]).first()
+    if data.get("name"):
+        name = data.get("name")
+        query = Map.query.filter_by(mapname=name).first()
         if query:
-            error = {"message": f"map with name '{data['name']}' already exists!"}
+            error = {"message": f"map with name '{name}' already exists!"}
             return make_response(jsonify(error), 409)
 
-        map_.mapname = data["name"]
+        map_.mapname = name
 
     map_.add()
     response = {

@@ -5,6 +5,7 @@ from flask_jwt_extended import jwt_required
 
 from jtimer.blueprints import times_index
 from jtimer.models.database import Map, MapTimes, InsertResult
+from jtimer.validation import validate_json
 
 
 @times_index.route("/map/<int:map_id>", methods=["GET"])
@@ -68,6 +69,14 @@ def get_times(map_id):
 
 
 @times_index.route("/insert/map/<int:map_id>")
+@validate_json(
+    {
+        "player_id": {"type": "integer", "min": 1, "required": True},
+        "player_class": {"type": "integer", "allowed": [2, 4], "required": True},
+        "start_time": {"type": "float", "min": 0, "required": True},
+        "end_time": {"type": "float", "min": 0, "required": True},
+    }
+)
 @jwt_required
 def insert_map(map_id):
     """Insert run to map with id.
@@ -114,78 +123,17 @@ def insert_map(map_id):
     :status 422: Missing or invalid json content.
     :returns: Insert result
     """
-    if not request.is_json:
-        error = {"message": "Missing 'Content-Type: application/json' header."}
-        return make_response(jsonify(error), 415)
 
     data = request.get_json()
 
-    if data is None:
-        error = {"message": "Missing json content"}
-        return make_response(jsonify(error), 422)
-
-    # map_id validation
     if map_id < 1:
         error = {"message": "map_id is invalid."}
         return make_response(jsonify(error), 422)
 
-    # player_id validation
     player_id = data.get("player_id")
-    if player_id is None:
-        error = {"message": "Missing player_id"}
-        return make_response(jsonify(error), 422)
-
-    if not isinstance(player_id, int):
-        error = {"message": "player_id is not type of int."}
-        return make_response(jsonify(error), 422)
-
-    if player_id < 1:
-        error = {"message": f"player_id value of {player_id} is invalid."}
-        return make_response(jsonify(error), 422)
-
-    # player class validation
     player_class = data.get("player_class")
-    if player_class is None:
-        error = {"message": "Missing player_class"}
-        return make_response(jsonify(error), 422)
-
-    if not isinstance(player_class, int):
-        error = {"message": "player_class is not type of int."}
-        return make_response(jsonify(error), 422)
-
-    if player_class not in [2, 4]:
-        error = {
-            "message": f"player_class value of {player_class} is invalid. Value of 2 or 4 required."
-        }
-        return make_response(jsonify(error), 422)
-
-    # start_time validation
     start_time = data.get("start_time")
-    if start_time is None:
-        error = {"message": "Missing start_time"}
-        return make_response(jsonify(error), 422)
-
-    if not isinstance(start_time, float):
-        error = {"message": "start_time is not type of float."}
-        return make_response(jsonify(error), 422)
-
-    if start_time < 0:
-        error = {"message": "start_time is negative."}
-        return make_response(jsonify(error), 422)
-
-    # end_time validation
     end_time = data.get("end_time")
-    if end_time is None:
-        error = {"message": "Missing end_time"}
-        return make_response(jsonify(error), 422)
-
-    if not isinstance(end_time, float):
-        error = {"message": "end_time is not type of float."}
-        return make_response(jsonify(error), 422)
-
-    if end_time < 0:
-        error = {"message": "end_time is negative."}
-        return make_response(jsonify(error), 422)
 
     map_ = Map.query.filter_by(id_=map_id).first()
     if map_ is None:
@@ -193,7 +141,11 @@ def insert_map(map_id):
         return make_response(jsonify(error), 404)
 
     entry = MapTimes(
-        map_id=map_id, player_id=player_id, start_time=start_time, end_time=end_time
+        map_id=map_id,
+        player_id=player_id,
+        player_class=player_class,
+        start_time=start_time,
+        end_time=end_time,
     )
     response = entry.add()
 
