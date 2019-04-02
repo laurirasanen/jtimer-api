@@ -116,7 +116,7 @@ def add_map_zone(map_id):
     :query p1: first corner of the zone. (list of integers)
     :query p2: second corner of the zone. (list of integers)
     :query index: checkpoint index. (required if zone_type="cp")
-    :query orientation: y-axis orientation, used for start zones. (optional, default: 0)
+    :query orientation: rotation around z-axis, used for start zones. (optional, default: 0)
     
     :status 200: Success.
     :status 404: Map not found.
@@ -199,7 +199,14 @@ def add_map_zone(map_id):
         # check for existing start zone
         zone = Zone.query.filter(Zone.id_ == map_.start_zone).first()
         if zone is None:
-            zone = Zone(x1=p1[0], y1=p1[1], z1=p1[2], x2=p2[0], y2=p2[1], z2=p2[2])
+            zone = Zone()
+
+        zone.x1 = p1[0]
+        zone.y1 = p1[1]
+        zone.z1 = p1[2]
+        zone.x2 = p2[0]
+        zone.y2 = p2[1]
+        zone.z2 = p2[2]
 
         if orientation:
             zone.orientation = orientation
@@ -212,7 +219,14 @@ def add_map_zone(map_id):
         # check for existing end zone
         zone = Zone.query.filter(Zone.id_ == map_.end_zone).first()
         if zone is None:
-            zone = Zone(x1=p1[0], y1=p1[1], z1=p1[2], x2=p2[0], y2=p2[1], z2=p2[2])
+            zone = Zone()
+
+        zone.x1 = p1[0]
+        zone.y1 = p1[1]
+        zone.z1 = p1[2]
+        zone.x2 = p2[0]
+        zone.y2 = p2[1]
+        zone.z2 = p2[2]
 
         zone.add()
         map_.end_zone = zone.id_
@@ -241,14 +255,14 @@ def add_map_zone(map_id):
             zone = Zone.query.filter_by(id_=cp.zone_id).first()
 
             if zone is None:
-                zone = Zone(x1=p1[0], y1=p1[1], z1=p1[2], x2=p2[0], y2=p2[1], z2=p2[2])
-            else:
-                zone.x1 = p1[0]
-                zone.y1 = p1[1]
-                zone.z1 = p1[2]
-                zone.x2 = p2[0]
-                zone.y2 = p2[1]
-                zone.z2 = p2[2]
+                zone = Zone()
+
+            zone.x1 = p1[0]
+            zone.y1 = p1[1]
+            zone.z1 = p1[2]
+            zone.x2 = p2[0]
+            zone.y2 = p2[1]
+            zone.z2 = p2[2]
 
             zone.add()
 
