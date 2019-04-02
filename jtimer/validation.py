@@ -20,15 +20,15 @@ class ExtendedValidator(Validator):
 
         # if target key doesn't exist, not required
         if key not in self.document:
-            return True
+            return
 
         # target key value is not what we specified, not required
         if self.document[key] != value:
-            return True
+            return
 
         # required and we have a value
         if _value:
-            return True
+            return
 
         # required and no value
         self._error(field, f"required field when {key} is {value}")
@@ -41,14 +41,12 @@ class ExtendedValidator(Validator):
             value = self.document.get(field)
 
             # has value, was checked by cerberus
-            if value != None:
+            if value is not None:
                 continue
 
             required_if = self._resolve_rules_set(definition).get("required_if")
             if required_if is not None:
                 self._validate_required_if(required_if, field, value)
-
-        self.error_handler.end(self)
 
         return not bool(self._errors)
 
