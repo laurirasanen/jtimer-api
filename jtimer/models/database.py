@@ -34,6 +34,7 @@ class Zone(db.Model):
     x2 = db.Column(db.Integer, nullable=False)
     y2 = db.Column(db.Integer, nullable=False)
     z2 = db.Column(db.Integer, nullable=False)
+    orientation = db.Column(db.Integer, default=0)
 
     @property
     def json(self):
@@ -41,6 +42,7 @@ class Zone(db.Model):
             "id": self.id_,
             "p1": [self.x1, self.y1, self.z1],
             "p2": [self.x2, self.y2, self.z2],
+            "orientation": self.orientation,
         }
 
     def add(self):
