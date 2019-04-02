@@ -1,6 +1,8 @@
+"""flask views for /players endpoint"""
+
 from flask import jsonify, make_response, request
+
 from jtimer.blueprints import players_index
-from jtimer.extensions import db
 from jtimer.models.database import Player
 
 
@@ -19,7 +21,7 @@ def list_players():
     **Example response**:
 
     .. sourcecode:: json
-    
+
       [
           {
               "id": 1,
@@ -44,7 +46,7 @@ def list_players():
               "steamid": "STEAM_0:0:36730682"
           }
       ]
-    
+
     :query limit: amount of players to get. (default: 50, min: 1, max: 50)
     :query start: player id to start the list from. (default: 1, min: 1)
     :status 200: players found.
@@ -60,8 +62,8 @@ def list_players():
 
     if players is None:
         return make_response("", 204)
-    else:
-        return make_response(jsonify([p.json for p in players]), 200)
+
+    return make_response(jsonify([p.json for p in players]), 200)
 
 
 @players_index.route("/search")
@@ -73,13 +75,13 @@ def find_player():
     **Example request**:
 
     .. sourcecode:: http
-    
+
       GET /players/search?player_id=1 HTTP/1.1
-    
+
     **Example response**:
 
     .. sourcecode:: json
-    
+
       {
           "id": 1,
           "name": "Larry",
@@ -91,20 +93,20 @@ def find_player():
           },
           "steamid": "STEAM_1:1:50152141"
       }
-    
+
     :query player_id: the playerid to search for.
     :query steam_id: the steamid to search for.
     :query name: the name to search for.
 
     **Note**: If multiple parameters are supplied, only one of them will be used.
     Parameters are prioritized in the order: playerid > steamid > name.
-    
+
     :status 200: player found.
     :status 204: no player found.
     :returns: Player
     """
-    playerid = request.args.get("player_id", default=None, type=int)
-    steamid = request.args.get("steam_id", default=None, type=str)
+    player_id = request.args.get("player_id", default=None, type=int)
+    steam_id = request.args.get("steam_id", default=None, type=str)
     name = request.args.get("name", default=None, type=str)
 
     player = Player.query.filter_by(id_=player_id).first()
@@ -115,5 +117,5 @@ def find_player():
 
     if player is None:
         return make_response("", 204)
-    else:
-        return make_response(jsonify(player.json), 200)
+
+    return make_response(jsonify(player.json), 200)

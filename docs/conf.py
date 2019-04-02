@@ -14,12 +14,10 @@
 #
 import os
 import sys
-
-sys.path.insert(0, os.path.abspath(".."))
-
+from configparser import ConfigParser
 import sphinx_rtd_theme
 
-from configparser import ConfigParser
+sys.path.insert(0, os.path.abspath(".."))
 
 config = ConfigParser()
 config.read("../jtimer/config/info.ini")

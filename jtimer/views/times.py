@@ -1,8 +1,10 @@
+"""flask views for /times endpoint"""
+
 from flask import jsonify, make_response, request
+from flask_jwt_extended import jwt_required
+
 from jtimer.blueprints import times_index
-from jtimer.extensions import db
-from jtimer.models.database import Map, MapTimes, Author, InsertResult
-from flask_jwt_extended import jwt_required, jwt_refresh_token_required
+from jtimer.models.database import Map, MapTimes, InsertResult
 
 
 @times_index.route("/map/<int:map_id>", methods=["GET"])
@@ -16,7 +18,7 @@ def get_times(map_id):
     .. sourcecode:: http
 
       POST /times/map/1?limit=1 HTTP/1.1
-    
+
     **Example response**:
 
     .. sourcecode:: json
@@ -40,9 +42,9 @@ def get_times(map_id):
               "rank": 1,
           }
       ]
-    
+
     :query map_id: map id.
-    
+
     :status 200: Success.
     :status 404: Map not found.
     :returns: Map info
@@ -61,8 +63,8 @@ def get_times(map_id):
 
     if times is None:
         return make_response("", 204)
-    else:
-        return make_response(jsonify([t.json for t in times]), 200)
+
+    return make_response(jsonify([t.json for t in times]), 200)
 
 
 @times_index.route("/insert/map/<int:map_id>")
@@ -84,7 +86,7 @@ def insert_map(map_id):
           "start_time": 12345.6789,
           "end_time": 9876.54321
       }
-    
+
     **Example response**:
 
     .. sourcecode:: json
@@ -99,13 +101,13 @@ def insert_map(map_id):
               "message": "Time updated."
           }
       ]
-    
+
     :query map_id: map id.
     :query player_id: player id.
     :query player_class: player class.
     :query start_time: run start time.
     :query end_time: run end time.
-    
+
     :status 200: Success.
     :status 404: Map not found.
     :status 415: Missing 'Content-Type: application/json' header.
@@ -151,7 +153,7 @@ def insert_map(map_id):
         error = {"message": "player_class is not type of int."}
         return make_response(jsonify(error), 422)
 
-    if player_class != 2 and player_class != 4:
+    if player_class not in [2, 4]:
         error = {
             "message": f"player_class value of {player_class} is invalid. Value of 2 or 4 required."
         }

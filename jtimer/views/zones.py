@@ -1,8 +1,10 @@
+"""flask views for /zones endpoint"""
+
 from flask import jsonify, make_response, request
-from jtimer.blueprints import zones_index
-from jtimer.extensions import db
-from jtimer.models.database import Zone, Map, MapCheckpoint
 from flask_jwt_extended import jwt_required
+
+from jtimer.blueprints import zones_index
+from jtimer.models.database import Zone, Map, MapCheckpoint
 
 
 @zones_index.route("/map/<int:map_id>", methods=["GET"])
@@ -16,7 +18,7 @@ def get_map_zones(map_id):
     .. sourcecode:: http
 
       GET /zones/map/1 HTTP/1.1
-    
+
     **Example response**:
 
     .. sourcecode:: json
@@ -46,9 +48,9 @@ def get_map_zones(map_id):
             }
           }
       ]
-    
+
     :query map_id: map id.
-    
+
     :status 200: Success.
     :status 404: Map not found.
 
@@ -61,7 +63,7 @@ def get_map_zones(map_id):
         return make_response(jsonify(error), 404)
 
     zones = []
-    if map_.start_zone != None:
+    if map_.start_zone is not None:
         zone = Zone.query.filter_by(id_=map_.start_zone).first()
 
         if zone:
@@ -69,7 +71,7 @@ def get_map_zones(map_id):
             zone_dict["zone_type"] = "start"
             zones.append(zone_dict)
 
-    if map_.end_zone != None:
+    if map_.end_zone is not None:
         zone = Zone.query.filter_by(id_=map_.end_zone).first()
         if zone:
             zone_dict = zone.json
@@ -78,8 +80,8 @@ def get_map_zones(map_id):
 
     checkpoints = MapCheckpoint.query.filter_by(map_id=map_id).all()
     if checkpoints:
-        for cp in checkpoints:
-            zones.append(cp.json)
+        for checkpoint in checkpoints:
+            zones.append(checkpoint.json)
 
     return make_response(jsonify(zones), 200)
 
@@ -102,7 +104,7 @@ def add_map_zone(map_id):
           "p1": [0, 256, 128],
           "p2": [256, 0, 256]
       }
-    
+
     **Example response**:
 
     .. sourcecode:: json
@@ -110,14 +112,14 @@ def add_map_zone(map_id):
       {
           "message": "zone added."
       }
-    
+
     :query map_id: map id.
     :query zone_type: type of zone. ("start", "end", "cp")
     :query p1: first corner of the zone. (list of integers)
     :query p2: second corner of the zone. (list of integers)
     :query index: checkpoint index. (required if zone_type="cp")
     :query orientation: rotation around z-axis, used for start zones. (optional, default: 0)
-    
+
     :status 200: Success.
     :status 404: Map not found.
     :status 415: Missing 'Content-Type: application/json' header.
@@ -159,32 +161,32 @@ def add_map_zone(map_id):
         return make_response(jsonify(error), 422)
 
     # p1 validation
-    p1 = data.get("p1")
-    if not isinstance(p1, list):
+    point1 = data.get("p1")
+    if not isinstance(point1, list):
         error = {"message": "p1 is not type of list."}
         return make_response(jsonify(error), 422)
 
-    if len(p1) != 3:
+    if len(point1) != 3:
         error = {"message": "Length of p1 is not 3."}
         return make_response(jsonify(error), 422)
 
-    for i in range(0, len(p1)):
-        if not isinstance(p1[i], int):
+    for i in range(0, len(point1)):
+        if not isinstance(point1[i], int):
             error = {"message": f"p1[{i}] is not type of int."}
             return make_response(jsonify(error), 422)
 
     # p2 validation
-    p2 = data.get("p2")
-    if not isinstance(p2, list):
+    point2 = data.get("p2")
+    if not isinstance(point2, list):
         error = {"message": "p2 is not type of list."}
         return make_response(jsonify(error), 422)
 
-    if len(p2) != 3:
+    if len(point2) != 3:
         error = {"message": "Length of p2 is not 3."}
         return make_response(jsonify(error), 422)
 
-    for i in range(0, len(p2)):
-        if not isinstance(p2[i], int):
+    for i in range(0, len(point2)):
+        if not isinstance(point2[i], int):
             error = {"message": f"p2[{i}] is not type of int."}
             return make_response(jsonify(error), 422)
 
@@ -201,8 +203,8 @@ def add_map_zone(map_id):
         if zone is None:
             zone = Zone()
 
-        zone.x1, zone.y1, zone.z1 = p1
-        zone.x2, zone.y2, zone.z2 = p2
+        zone.x1, zone.y1, zone.z1 = point1
+        zone.x2, zone.y2, zone.z2 = point2
 
         if orientation:
             zone.orientation = orientation
@@ -217,8 +219,8 @@ def add_map_zone(map_id):
         if zone is None:
             zone = Zone()
 
-        zone.x1, zone.y1, zone.z1 = p1
-        zone.x2, zone.y2, zone.z2 = p2
+        zone.x1, zone.y1, zone.z1 = point1
+        zone.x2, zone.y2, zone.z2 = point2
 
         zone.add()
         map_.end_zone = zone.id_
@@ -232,29 +234,36 @@ def add_map_zone(map_id):
             return make_response(jsonify(error), 422)
 
         # check for existing checkpoint
-        cp = MapCheckpoint.query.filter(
+        checkpoint = MapCheckpoint.query.filter(
             MapCheckpoint.map_id == map_id, MapCheckpoint.cp_index == index
         ).first()
 
-        if cp is None:
-            zone = Zone(x1=p1[0], y1=p1[1], z1=p1[2], x2=p2[0], y2=p2[1], z2=p2[2])
+        if checkpoint is None:
+            zone = Zone(
+                x1=point1[0],
+                y1=point1[1],
+                z1=point1[2],
+                x2=point2[0],
+                y2=point2[1],
+                z2=point2[2],
+            )
 
             zone.add()
 
-            cp = MapCheckpoint(map_id=map_id, zone_id=zone.id_, cp_index=index)
+            checkpoint = MapCheckpoint(map_id=map_id, zone_id=zone.id_, cp_index=index)
         else:
             # check for existing zone
-            zone = Zone.query.filter_by(id_=cp.zone_id).first()
+            zone = Zone.query.filter_by(id_=checkpoint.zone_id).first()
 
             if zone is None:
                 zone = Zone()
 
-            zone.x1, zone.y1, zone.z1 = p1
-            zone.x2, zone.y2, zone.z2 = p2
+            zone.x1, zone.y1, zone.z1 = point1
+            zone.x2, zone.y2, zone.z2 = point2
 
             zone.add()
 
-        cp.add()
+        checkpoint.add()
 
     response = {"message": "zone added."}
     return make_response(jsonify(response), 200)

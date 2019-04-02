@@ -1,3 +1,5 @@
+"""flask views for /token endpoint"""
+
 from flask import jsonify, make_response, request, current_app
 from flask_jwt_extended import (
     create_access_token,
@@ -7,8 +9,8 @@ from flask_jwt_extended import (
     get_jwt_identity,
     get_raw_jwt,
 )
+
 from jtimer.blueprints import token_index
-from jtimer.extensions import db
 from jtimer.models.database import User, RevokedToken
 
 
@@ -22,19 +24,19 @@ def token_auth():
 
     **Example request**:
 
-    .. sourcecode:: http   
-    
+    .. sourcecode:: http
+
       POST /token/auth HTTP/1.1
       Content-Type: application/json
-      { 
-          "username": "Jane", 
-          "password": "Doe" 
+      {
+          "username": "Jane",
+          "password": "Doe"
       }
-    
+
     **Example response**:
 
     .. sourcecode:: json
-    
+
       {
           "message": "Authenticated",
           "access_token": <access_token>,
@@ -42,10 +44,10 @@ def token_auth():
           "refresh_token": <refresh_token>,
           "refresh_token_expires_in": 86400
       }
-    
+
     :query username: username.
     :query password: password.
-    
+
     :status 200: Authenticated.
     :status 401: Invalid username or password.
     :status 415: Missing 'Content-Type: application/json' header.
@@ -95,8 +97,8 @@ def token_auth():
             }
             return make_response(jsonify(response), 200)
 
-    """Send same error if username OR password is incorrect.
-    Don't tell the requester which one."""
+    # Send same error if username OR password is incorrect.
+    # Don't tell the requester which one.
     error = {"message": "Invalid username or password"}
     return make_response(jsonify(error), 401)
 
@@ -111,22 +113,22 @@ def token_refresh():
     **Example request**:
 
     .. sourcecode:: http
-    
+
       POST /token/refresh HTTP/1.1
       Authorization: Bearer <refresh_token>
-    
+
     **Example response**:
 
     .. sourcecode:: json
-    
+
       {
           "message": "Access token refreshed",
           "access_token": <access_token>,
           "expires_in": 3600
       }
-    
+
     :query refresh_token: A valid refresh token.
-    
+
     :status 200: Success.
     :returns: Access token
     """
@@ -152,32 +154,29 @@ def token_revoke_refresh():
     **Example request**:
 
     .. sourcecode:: http
-    
+
       POST /token/revoke/refresh HTTP/1.1
       Authorization: Bearer <refresh_token>
-    
+
     **Example response**:
 
     .. sourcecode:: json
-    
+
       {
           "message": "Refresh token has been revoked."
       }
-    
+
     :query refresh_token: A valid refresh token.
-    
+
     :status 200: Success.
     """
 
-    try:
-        jti = get_raw_jwt()["jti"]
-        revoked_token = RevokedToken(jti=jti)
-        revoked_token.add()
-        response = {"message": "Refresh token has been revoked."}
-        return make_response(jsonify(response), 200)
-    except:
-        response = {"message": "Something went wrong."}
-        return make_response(jsonify(response), 500)
+    jti = get_raw_jwt()["jti"]
+    revoked_token = RevokedToken(jti=jti)
+    revoked_token.add()
+
+    response = {"message": "Refresh token has been revoked."}
+    return make_response(jsonify(response), 200)
 
 
 @token_index.route("/revoke/access", methods=["POST"])
@@ -190,29 +189,26 @@ def token_revoke_access():
     **Example request**:
 
     .. sourcecode:: http
-    
+
       POST /token/revoke/access HTTP/1.1
       Authorization: Bearer <access_token>
-    
+
     **Example response**:
 
     .. sourcecode:: json
-    
+
       {
           "message": "Access token has been revoked."
       }
-    
+
     :query access_token: A valid access token.
-    
+
     :status 200: Success.
     """
 
-    try:
-        jti = get_raw_jwt()["jti"]
-        revoked_token = RevokedToken(jti=jti)
-        revoked_token.add()
-        response = {"message": "Access token has been revoked."}
-        return make_response(jsonify(response), 200)
-    except:
-        response = {"message": "Something went wrong."}
-        return make_response(jsonify(response), 500)
+    jti = get_raw_jwt()["jti"]
+    revoked_token = RevokedToken(jti=jti)
+    revoked_token.add()
+
+    response = {"message": "Access token has been revoked."}
+    return make_response(jsonify(response), 200)

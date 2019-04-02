@@ -1,10 +1,10 @@
 """flask views for /maps endpoint"""
 
 from flask import jsonify, make_response, request
+from flask_jwt_extended import jwt_required
+
 from jtimer.blueprints import maps_index
-from jtimer.extensions import db
 from jtimer.models.database import Map, Author
-from flask_jwt_extended import jwt_required, jwt_refresh_token_required
 
 
 @maps_index.route("/<int:map_id>/info", methods=["GET"])
@@ -18,11 +18,11 @@ def map_info(map_id):
     .. sourcecode:: http
 
       POST /maps/1/info HTTP/1.1
-    
+
     **Example response**:
 
     .. sourcecode:: json
-    
+
       {
           "id": 1,
           "name": "jump_soar_a4",
@@ -42,25 +42,25 @@ def map_info(map_id):
               }
           ]
       }
-    
+
     :query map_id: map id.
-    
+
     :status 200: Success.
     :status 404: Map not found.
     :returns: Map info
     """
-    m = Map.query.filter_by(id_=map_id).first()
+    map_ = Map.query.filter_by(id_=map_id).first()
     authors = Author.query.filter_by(id_=map_id).all()
 
-    if m is None:
+    if map_ is None:
         response = {"message": "Map not found."}
         return make_response(jsonify(response), 404)
 
-    response = m.json
+    response = map_.json
     response["authors"] = []
     if authors is not None:
-        for a in authors:
-            response["authors"].append(a.json)
+        for author in authors:
+            response["authors"].append(author.json)
 
     return make_response(jsonify(response), 200)
 
@@ -73,14 +73,14 @@ def map_info_name(mapname):
 
     **Example request**:
 
-    .. sourcecode:: http   
+    .. sourcecode:: http
 
       POST /maps/name/jump_soar_a4 HTTP/1.1
-    
+
     **Example response**:
 
     .. sourcecode:: json
-    
+
       {
           "id": 1,
           "name": "jump_soar_a4",
@@ -100,26 +100,26 @@ def map_info_name(mapname):
               }
           ]
       }
-    
+
     :query mapname: map name.
-    
+
     :status 200: Success.
     :status 404: Map not found.
     :returns: Map info
     """
-    m = Map.query.filter_by(mapname=mapname).first()
+    map_ = Map.query.filter_by(mapname=mapname).first()
 
-    if m is None:
+    if map_ is None:
         response = {"message": "Map not found."}
         return make_response(jsonify(response), 404)
 
-    authors = Author.query.filter_by(id_=m.id_).all()
+    authors = Author.query.filter_by(id_=map_.id_).all()
 
-    response = m.json
+    response = map_.json
     response["authors"] = []
     if authors is not None:
-        for a in authors:
-            response["authors"].append(a.json)
+        for author in authors:
+            response["authors"].append(author.json)
 
     return make_response(jsonify(response), 200)
 
@@ -133,27 +133,27 @@ def add_map():
 
     **Example request**:
 
-    .. sourcecode:: http   
+    .. sourcecode:: http
 
       POST /maps/add HTTP/1.1
       Authorization: Bearer <access_token>
       {
           "name": "jump_soar_a4"
       }
-    
+
     **Example response**:
 
     .. sourcecode:: json
-    
+
       {
           "message": "map 'jump_soar_a4' added!",
           "map_id": 1
       }
-    
+
     :query name: map name.
     :query stier: soldier tier. (default: 0, min: 0, max: 10)
     :query dtier: demoman tier. (default: 0, min: 0, max: 10)
-    
+
     :status 200: Success.
     :status 409: Map name already exists.
     :status 415: Missing 'Content-Type: application/json' header.
@@ -196,7 +196,8 @@ def add_map():
         if stier < 0:
             error = {"message": "stier is negative."}
             return make_response(jsonify(error), 422)
-        elif stier > 10:
+
+        if stier > 10:
             error = {"message": "stier is too big. Max value: 10"}
             return make_response(jsonify(error), 422)
     else:
@@ -212,7 +213,8 @@ def add_map():
         if dtier < 0:
             error = {"message": "dtier is negative."}
             return make_response(jsonify(error), 422)
-        elif dtier > 10:
+
+        if dtier > 10:
             error = {"message": "dtier is too big.  Max value: 10"}
             return make_response(jsonify(error), 422)
     else:
@@ -240,18 +242,18 @@ def update(map_id):
 
     **Example request**:
 
-    .. sourcecode:: http   
+    .. sourcecode:: http
 
       POST /maps/update/1 HTTP/1.1
       Authorization: Bearer <access_token>
       {
           "stier": 10
       }
-    
+
     **Example response**:
 
     .. sourcecode:: json
-    
+
       {
           "message": "map updated!",
           "map_id": 1,
@@ -259,11 +261,11 @@ def update(map_id):
           "stier": 10,
           "dtier": 3
       }
-    
+
     :query name: map name. (optional, max length: 128)
     :query stier: soldier tier. (optional, min: 0, max: 10)
     :query dtier: demoman tier. (optional, min: 0, max: 10)
-    
+
     :status 200: Success.
     :status 409: Map name already exists.
     :status 415: Missing 'Content-Type: application/json' header.
@@ -297,7 +299,8 @@ def update(map_id):
         if stier < 0:
             error = {"message": "stier is negative."}
             return make_response(jsonify(error), 422)
-        elif stier > 10:
+
+        if stier > 10:
             error = {"message": "stier is too big. Max value: 10"}
             return make_response(jsonify(error), 422)
 
@@ -313,7 +316,8 @@ def update(map_id):
         if dtier < 0:
             error = {"message": "dtier is negative."}
             return make_response(jsonify(error), 422)
-        elif dtier > 10:
+
+        if dtier > 10:
             error = {"message": "dtier is too big.  Max value: 10"}
             return make_response(jsonify(error), 422)
 
@@ -334,8 +338,8 @@ def update(map_id):
         if query:
             error = {"message": f"map with name '{name}' already exists!"}
             return make_response(jsonify(error), 409)
-        else:
-            map_.mapname = name
+
+        map_.mapname = name
 
     map_.add()
     response = {

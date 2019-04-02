@@ -1,6 +1,8 @@
+"""flask views for /user endpoint"""
+
 from flask import jsonify, make_response, request
+
 from jtimer.blueprints import user_index
-from jtimer.extensions import db
 from jtimer.models.database import User
 
 
@@ -13,7 +15,7 @@ def change_password():
     **Example request**:
 
     .. sourcecode:: http
-    
+
       POST /user/changepassword HTTP/1.1
       Content-Type: application/json
       {
@@ -21,19 +23,19 @@ def change_password():
           "password": "Foo",
           "newpassword": "Bar"
       }
-    
+
     **Example response**:
 
     .. sourcecode:: json
-    
+
       {
           "message": "Password changed."
       }
-    
+
     :query username: A valid username.
     :query password: A valid password.
     :query newpassword: The new password.
-    
+
     :status 200: Success.
     :status 401: Invalid username or password.
     :status 415: Missing 'Content-Type: application/json' header.
@@ -79,7 +81,7 @@ def change_password():
             response = {"message": "Password changed."}
             return make_response(jsonify(response), 200)
 
-    """Send same error if username OR password is incorrect.
-    Don't tell the requester which one."""
+    # Send same error if username OR password is incorrect.
+    # Don't tell the requester which one.
     error = {"message": "Invalid username or password"}
-    make_response(jsonify(error), 401)
+    return make_response(jsonify(error), 401)
