@@ -49,7 +49,7 @@ class Zone(db.Model):
         query = Zone.query.filter_by(id_=self.id_).first()
         if not query:
             db.session.add(self)
-            
+
         db.session.commit()
 
 

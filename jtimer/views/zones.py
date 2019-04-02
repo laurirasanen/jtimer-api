@@ -201,12 +201,8 @@ def add_map_zone(map_id):
         if zone is None:
             zone = Zone()
 
-        zone.x1 = p1[0]
-        zone.y1 = p1[1]
-        zone.z1 = p1[2]
-        zone.x2 = p2[0]
-        zone.y2 = p2[1]
-        zone.z2 = p2[2]
+        zone.x1, zone.y1, zone.z1 = p1
+        zone.x2, zone.y2, zone.z2 = p2
 
         if orientation:
             zone.orientation = orientation
@@ -221,12 +217,8 @@ def add_map_zone(map_id):
         if zone is None:
             zone = Zone()
 
-        zone.x1 = p1[0]
-        zone.y1 = p1[1]
-        zone.z1 = p1[2]
-        zone.x2 = p2[0]
-        zone.y2 = p2[1]
-        zone.z2 = p2[2]
+        zone.x1, zone.y1, zone.z1 = p1
+        zone.x2, zone.y2, zone.z2 = p2
 
         zone.add()
         map_.end_zone = zone.id_
@@ -257,12 +249,8 @@ def add_map_zone(map_id):
             if zone is None:
                 zone = Zone()
 
-            zone.x1 = p1[0]
-            zone.y1 = p1[1]
-            zone.z1 = p1[2]
-            zone.x2 = p2[0]
-            zone.y2 = p2[1]
-            zone.z2 = p2[2]
+            zone.x1, zone.y1, zone.z1 = p1
+            zone.x2, zone.y2, zone.z2 = p2
 
             zone.add()
 
