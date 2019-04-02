@@ -1,3 +1,5 @@
+"""Initialize flask application"""
+
 import os
 import json
 from importlib import import_module
@@ -35,6 +37,7 @@ jwt.init_app(application)
 
 @jwt.token_in_blacklist_loader
 def check_if_token_in_blacklist(decrypted_token):
+    """Add token blacklist check to flask_jwt_extended"""
     jti = decrypted_token["jti"]
     return RevokedToken.is_jti_blacklisted(jti)
 

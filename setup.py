@@ -1,3 +1,5 @@
+"""Setup script for READTHEDOCS"""
+
 from setuptools import setup
 
 

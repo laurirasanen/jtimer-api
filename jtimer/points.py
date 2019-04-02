@@ -1,3 +1,5 @@
+"""Functions for calculating player point awards."""
+
 import math
 
 

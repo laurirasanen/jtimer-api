@@ -1,3 +1,5 @@
+"""flask views for /maps endpoint"""
+
 from flask import jsonify, make_response, request
 from jtimer.blueprints import maps_index
 from jtimer.extensions import db
@@ -13,7 +15,7 @@ def map_info(map_id):
 
     **Example request**:
 
-    .. sourcecode:: http   
+    .. sourcecode:: http
 
       POST /maps/1/info HTTP/1.1
     

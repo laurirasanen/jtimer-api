@@ -1,12 +1,14 @@
-from flask import jsonify, make_response
-from configparser import ConfigParser
-from jtimer.blueprints import application_index
+"""flask views for api index"""
 
-config = ConfigParser()
+from configparser import ConfigParser
+from flask import jsonify, make_response
+
+from jtimer.blueprints import application_index
 
 
 @application_index.route("/")
 def index():
+    """View for index"""
     return make_response(
         "http://github.com/occasionally-cool/jtimer-api", 418
     )  # I'm a teapot
@@ -15,8 +17,8 @@ def index():
 @application_index.route("/info")
 @application_index.route("/version")
 def info():
+    """View for getting api info"""
+    config = ConfigParser()
     config.read("jtimer/config/info.ini")
-    info = {}
-    info["version"] = config.get("root", "version", fallback=None)
-    info["source"] = config.get("root", "source", fallback=None)
-    return make_response(jsonify(info), 200)
+    info_dict = dict(config.items("root"))
+    return make_response(jsonify(info_dict), 200)

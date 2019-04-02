@@ -1,10 +1,15 @@
-from jtimer.extensions import db
-from passlib.hash import bcrypt
+"""sqlalchemy models for flask application"""
+
 from enum import Enum
+from passlib.hash import bcrypt
+
+from jtimer.extensions import db
 from jtimer.points import calc_points
 
 
 class Player(db.Model):
+    """Player table sqlalchemy model"""
+
     id_ = db.Column("id", db.Integer, primary_key=True)
     steam_id = db.Column(db.String(17), nullable=False)
     username = db.Column(db.String(32), nullable=False)
@@ -14,6 +19,7 @@ class Player(db.Model):
 
     @property
     def json(self):
+        """Json serializable dictionary of the model"""
         return {
             "id": self.id_,
             "steamid": self.steamid,
@@ -27,6 +33,8 @@ class Player(db.Model):
 
 
 class Zone(db.Model):
+    """Zone table sqlalchemy model"""
+
     id_ = db.Column("id", db.Integer, primary_key=True)
     x1 = db.Column(db.Integer, nullable=False)
     y1 = db.Column(db.Integer, nullable=False)
@@ -38,6 +46,7 @@ class Zone(db.Model):
 
     @property
     def json(self):
+        """Json serializable dictionary of the model"""
         return {
             "id": self.id_,
             "p1": [self.x1, self.y1, self.z1],
@@ -46,6 +55,8 @@ class Zone(db.Model):
         }
 
     def add(self):
+        """Adds the model to the sqlalchemy session and commits.
+        Updates the existing model if it already exists in the database."""
         query = Zone.query.filter_by(id_=self.id_).first()
         if not query:
             db.session.add(self)
@@ -54,6 +65,8 @@ class Zone(db.Model):
 
 
 class Map(db.Model):
+    """Map table sqlalchemy model"""
+
     id_ = db.Column("id", db.Integer, primary_key=True)
     mapname = db.Column(db.String(128), nullable=False)
     stier = db.Column(db.Integer, default=0, nullable=False)
@@ -65,6 +78,7 @@ class Map(db.Model):
 
     @property
     def json(self):
+        """Json serializable dictionary of the model"""
         return {
             "id": self.id_,
             "name": self.mapname,
@@ -76,6 +90,8 @@ class Map(db.Model):
         }
 
     def add(self):
+        """Adds the model to the sqlalchemy session and commits.
+        Updates the existing model if it already exists in the database."""
         query = Map.query.filter(
             Map.mapname == self.mapname or Map.id_ == self.id_
         ).first()
@@ -86,6 +102,8 @@ class Map(db.Model):
 
 
 class Author(db.Model):
+    """Author table sqlalchemy model"""
+
     id_ = db.Column("id", db.Integer, primary_key=True)
     name = db.Column(db.String(32), nullable=False)
     player_id = db.Column(None, db.ForeignKey("player.id"), nullable=True)
@@ -93,17 +111,20 @@ class Author(db.Model):
 
     @property
     def json(self):
-        player = Player.query.filter_by(playerid=playerid).first()
+        """Json serializable dictionary of the model"""
+        player = Player.query.filter_by(id_=self.player_id).first()
         if player:
             player_dict = player.json
             del player_dict["rank_info"]
             player_dict["name"] = self.name
             return player_dict
-        else:
-            return {"name": self.name}
+
+        return {"name": self.name}
 
 
 class Course(db.Model):
+    """Course table sqlalchemy model"""
+
     id_ = db.Column("id", db.Integer, primary_key=True)
     map_id = db.Column(None, db.ForeignKey("map.id"), nullable=False)
     course_index = db.Column(db.Integer, nullable=False)
@@ -116,6 +137,8 @@ class Course(db.Model):
 
 
 class Bonus(db.Model):
+    """Bonus table sqlalchemy model"""
+
     id_ = db.Column("id", db.Integer, primary_key=True)
     map_id = db.Column(None, db.ForeignKey("map.id"), nullable=False)
     bonus_index = db.Column(db.Integer, nullable=False)
@@ -128,6 +151,8 @@ class Bonus(db.Model):
 
 
 class MapCheckpoint(db.Model):
+    """map_checkpoint table sqlalchemy model"""
+
     id_ = db.Column("id", db.Integer, primary_key=True)
     zone_id = db.Column(None, db.ForeignKey("zone.id"), nullable=False)
     map_id = db.Column(None, db.ForeignKey("map.id"), nullable=False)
@@ -135,6 +160,7 @@ class MapCheckpoint(db.Model):
 
     @property
     def json(self):
+        """Json serializable dictionary of the model"""
         zone = Zone.query.filter_by(id_=self.zone_id).first()
         zone_dict = None
         if zone:
@@ -149,6 +175,8 @@ class MapCheckpoint(db.Model):
         }
 
     def add(self):
+        """Adds the model to the sqlalchemy session and commits.
+        Updates the existing model if it already exists in the database."""
         query = MapCheckpoint.query.filter_by(id_=self.id_).first()
         if not query:
             db.session.add(self)
@@ -156,6 +184,8 @@ class MapCheckpoint(db.Model):
 
 
 class CourseCheckpoint(db.Model):
+    """course_checkpoint table sqlalchemy model"""
+
     id_ = db.Column("id", db.Integer, primary_key=True)
     zone_id = db.Column(None, db.ForeignKey("zone.id"), nullable=False)
     course_id = db.Column(None, db.ForeignKey("course.id"), nullable=False)
@@ -163,6 +193,8 @@ class CourseCheckpoint(db.Model):
 
 
 class BonusCheckpoint(db.Model):
+    """bonus_checkpoint table sqlalchemy model"""
+
     id_ = db.Column("id", db.Integer, primary_key=True)
     zone_id = db.Column(None, db.ForeignKey("zone.id"), nullable=False)
     bonus_id = db.Column(None, db.ForeignKey("bonus.id"), nullable=False)
@@ -170,6 +202,8 @@ class BonusCheckpoint(db.Model):
 
 
 class MapTimes(db.Model):
+    """map_times table sqlalchemy model"""
+
     id_ = db.Column("id", db.Integer, primary_key=True)
     map_id = db.Column(None, db.ForeignKey("map.id"), nullable=False)
     player_id = db.Column(None, db.ForeignKey("player.id"), nullable=False)
@@ -182,6 +216,7 @@ class MapTimes(db.Model):
 
     @property
     def json(self):
+        """Json serializable dictionary of the model"""
         player = Player.query.filter_by(id_=self.player_id).first()
         if player is None:
             return {
@@ -192,22 +227,26 @@ class MapTimes(db.Model):
                 "time": self.end_time - self.start_time,
                 "rank": self.rank,
             }
-        else:
-            return {
-                "id": self.id_,
-                "map_id": self.map_id,
-                "player": player.json,
-                "class": self.player_class,
-                "time": self.end_time - self.start_time,
-                "rank": self.rank,
-            }
+
+        return {
+            "id": self.id_,
+            "map_id": self.map_id,
+            "player": player.json,
+            "class": self.player_class,
+            "time": self.end_time - self.start_time,
+            "rank": self.rank,
+        }
 
     def add(self):
+        """Adds the model to the sqlalchemy session and commits.
+        Updates the existing model if it already exists in the database.
+        Existing time is only updated if the new one is faster."""
         query = MapTimes.query.filter(
             MapTimes.map_id == self.map_id
             and MapTimes.player_id == self.player_id
             and MapTimes.player_class == self.player_class
         ).first()
+
         if not bool(query):
             # no existing run, add this
             db.session.add(self)
@@ -220,48 +259,71 @@ class MapTimes(db.Model):
                 "completions": completions,
                 "points_gained": self.points,
             }
-        else:
-            # time already exists, check if faster
-            old_time = query.end_time - query.start_time
-            new_time = self.end_time - self.start_time
-            old_points = query.points
-            if new_time < old_time:
-                improvement = old_time - new_time
-                # faster, add this
-                db.session.add(self)
-                # remove old time
-                db.session.delete(query)
-                db.session.commit()
-                # update ranks
-                completions = MapTimes.update_ranks(self.map_id)
-                return {
-                    "result": InsertResult.UPDATED,
-                    "rank": self.rank,
-                    "points_gained": self.points - old_points,
-                    "completions": completions,
-                    "improvement": improvement,
-                }
-            else:
-                # slower
-                return {"result": InsertResult.NONE}
 
-    @classmethod
-    def update_ranks(map_id):
-        times = (
-            MapTimes.query.filter(MapTimes.map_id == map_id).order_by(duration).all()
-        )
-        if times:
-            for i in range(0, len(times)):
-                times[i].rank = i + 1
-                times[i].points = calc_points(
-                    times[0].duration, times[i].duration, len(times)
-                )
+        # time already exists, check if faster
+        old_time = query.end_time - query.start_time
+        new_time = self.end_time - self.start_time
+        old_points = query.points
+        if new_time < old_time:
+            improvement = old_time - new_time
+            # faster, add this
+            db.session.add(self)
+            # remove old time
+            db.session.delete(query)
             db.session.commit()
-            return len(times)
-        return 0
+            # update ranks
+            completions = MapTimes.update_ranks(self.map_id)
+            return {
+                "result": InsertResult.UPDATED,
+                "rank": self.rank,
+                "points_gained": self.points - old_points,
+                "completions": completions,
+                "improvement": improvement,
+            }
+
+        # slower
+        return {"result": InsertResult.NONE}
+
+    @staticmethod
+    def update_ranks(map_id):
+        """Update ranks and points for all times on map."""
+        completions = {"soldier": 0, "demoman": 0}
+
+        soldier_times = (
+            MapTimes.query.filter(MapTimes.map_id == map_id, MapTimes.player_class == 3)
+            .order_by(MapTimes.duration)
+            .all()
+        )
+        if soldier_times:
+            completions["soldier"] = len(soldier_times)
+            for i in range(0, len(soldier_times)):
+                soldier_times[i].rank = i + 1
+                soldier_times[i].points = calc_points(
+                    soldier_times[0].duration,
+                    soldier_times[i].duration,
+                    len(soldier_times),
+                )
+
+        demo_times = (
+            MapTimes.query.filter(MapTimes.map_id == map_id, MapTimes.player_class == 4)
+            .order_by(MapTimes.duration)
+            .all()
+        )
+        if demo_times:
+            completions["demoman"] = len(demo_times)
+            for i in range(0, len(demo_times)):
+                demo_times[i].rank = i + 1
+                demo_times[i].points = calc_points(
+                    demo_times[0].duration, demo_times[i].duration, len(demo_times)
+                )
+
+        db.session.commit()
+        return completions
 
 
 class CourseTimes(db.Model):
+    """course_times table sqlalchemy model"""
+
     id_ = db.Column("id", db.Integer, primary_key=True)
     course_id = db.Column(None, db.ForeignKey("course.id"), nullable=False)
     player_id = db.Column(None, db.ForeignKey("player.id"), nullable=False)
@@ -272,6 +334,8 @@ class CourseTimes(db.Model):
 
 
 class BonusTimes(db.Model):
+    """bonus_times table sqlalchemy model"""
+
     id_ = db.Column("id", db.Integer, primary_key=True)
     bonus_id = db.Column(None, db.ForeignKey("bonus.id"), nullable=False)
     player_id = db.Column(None, db.ForeignKey("player.id"), nullable=False)
@@ -282,6 +346,8 @@ class BonusTimes(db.Model):
 
 
 class MapCheckpointTimes(db.Model):
+    """map_checkpoint_times table sqlalchemy model"""
+
     id_ = db.Column("id", db.Integer, primary_key=True)
     checkpoint_id = db.Column(None, db.ForeignKey("map_checkpoint.id"), nullable=False)
     time_id = db.Column(None, db.ForeignKey("map_times.id"), nullable=False)
@@ -289,6 +355,8 @@ class MapCheckpointTimes(db.Model):
 
 
 class CourseCheckpointTimes(db.Model):
+    """course_checkpoint_times table sqlalchemy model"""
+
     id_ = db.Column("id", db.Integer, primary_key=True)
     checkpoint_id = db.Column(
         None, db.ForeignKey("course_checkpoint.id"), nullable=False
@@ -298,6 +366,8 @@ class CourseCheckpointTimes(db.Model):
 
 
 class BonusCheckpointTimes(db.Model):
+    """bonus_checkpoint_times table sqlalchemy model"""
+
     id_ = db.Column("id", db.Integer, primary_key=True)
     checkpoint_id = db.Column(
         None, db.ForeignKey("bonus_checkpoint.id"), nullable=False
@@ -307,7 +377,8 @@ class BonusCheckpointTimes(db.Model):
 
 
 class User(db.Model):
-    """Model for authenticating restricted views"""
+    """user table sqlalchemy model
+    for authenticating restricted views"""
 
     id_ = db.Column("id", db.Integer, primary_key=True)
     username = db.Column("username", db.String(64), nullable=False)
@@ -315,39 +386,52 @@ class User(db.Model):
 
     @staticmethod
     def generate_hash(password):
+        """Returns a new hash for the password."""
         return bcrypt.hash(password)
 
     def verify_hash(self, password):
+        """Checks password against stored password hash of the user.
+        Returns bool."""
         return bcrypt.verify(password, self.password)
 
     def change_hash(self, password):
+        """Changes stored password hash of the user."""
         self.password = self.generate_hash(password)
         db.session.commit()
 
     def add(self):
+        """Adds the model to the sqlalchemy session and commits.
+        Updates the existing model if it already exists in the database."""
         query = User.query.filter_by(username=self.username).first()
         if not bool(query):
             db.session.add(self)
-            db.session.commit()
+        db.session.commit()
 
 
 class RevokedToken(db.Model):
-    """Model for storing revoked tokens"""
+    """revoked_token table sqlalchemy model
+    for storing revoked tokens"""
 
     id_ = db.Column("id", db.Integer, primary_key=True)
     jti = db.Column("jti", db.String(120), nullable=False)
 
     def add(self):
+        """Adds the model to the sqlalchemy session and commits."""
         db.session.add(self)
         db.session.commit()
 
     @classmethod
     def is_jti_blacklisted(cls, jti):
+        """Checks if token 'jti' is blacklisted.
+        Returns bool."""
         query = cls.query.filter_by(jti=jti).first()
         return bool(query)
 
 
 class InsertResult(Enum):
+    """Result of insert query.
+    Used for responding to api requests."""
+
     NONE = 0
     ADDED = 1
     UPDATED = 2

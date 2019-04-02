@@ -1,7 +1,11 @@
+"""Configuration for flask application"""
+
 import os
 
 
-class MySQL(object):
+class MySQL:
+    """Configuration for flask_sqlalchemy"""
+
     # make sure variables are set to something,
     # so we don't get errors while building docs
 
@@ -30,18 +34,23 @@ class MySQL(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
-class Api(object):
+class Api:
+    """Configuration for outwards facing api"""
+
     # don't sort json keys
     JSON_SORT_KEYS = False
 
     if not os.environ.get("READTHEDOCS"):
-        assert os.environ.get("SECRET_KEY") != None
+        assert os.environ.get("SECRET_KEY") is not None
         SECRET_KEY = os.environ.get("SECRET_KEY")
 
-        assert os.environ.get("JWT_SECRET_KEY") != None
+        assert os.environ.get("JWT_SECRET_KEY") is not None
         JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY")
 
     JWT_ACCESS_TOKEN_EXPIRES = 60 * 60
     JWT_REFRESH_TOKEN_EXPIRES = 60 * 60 * 24
     JWT_BLACKLIST_ENABLED = True
     JWT_BLACKLIST_TOKEN_CHECKS = ["access", "refresh"]
+
+
+__all__ = ("MySQL", "Api")
