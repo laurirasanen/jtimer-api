@@ -189,10 +189,20 @@ def add_map_zone(map_id):
             return make_response(jsonify(error), 422)
 
     if zone_type == "start":
+        # optional orientation
+        orientation = data.get("orientation")
+        if orientation:
+            if not isinstance(orientation, int):
+                error = {"message": "orientation is not type of int"}
+                return make_response(jsonify(error), 422)
+
         # check for existing start zone
         zone = Zone.query.filter(Zone.id_ == map_.start_zone).first()
         if zone is None:
             zone = Zone(x1=p1[0], y1=p1[1], z1=p1[2], x2=p2[0], y2=p2[1], z2=p2[2])
+
+        if orientation:
+            zone.orientation = orientation
 
         zone.add()
         map_.start_zone = zone.id_
@@ -215,9 +225,6 @@ def add_map_zone(map_id):
             error = {"message": "Missing index for zone_type 'cp'."}
             return make_response(jsonify(error), 422)
 
-        # optional orientation
-        orientation = data.get("orientation")
-
         # check for existing checkpoint
         cp = MapCheckpoint.query.filter(
             MapCheckpoint.map_id == map_id, MapCheckpoint.cp_index == index
@@ -225,9 +232,6 @@ def add_map_zone(map_id):
 
         if cp is None:
             zone = Zone(x1=p1[0], y1=p1[1], z1=p1[2], x2=p2[0], y2=p2[1], z2=p2[2])
-
-            if orientation:
-                zone.orientation = orientation
 
             zone.add()
 
@@ -245,9 +249,6 @@ def add_map_zone(map_id):
                 zone.x2 = p2[0]
                 zone.y2 = p2[1]
                 zone.z2 = p2[2]
-
-            if orientation:
-                zone.orientation = orientation
 
             zone.add()
 
