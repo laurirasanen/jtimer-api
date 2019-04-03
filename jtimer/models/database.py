@@ -247,6 +247,8 @@ class MapTimes(db.Model):
             and MapTimes.player_class == self.player_class
         ).first()
 
+        records = MapTimes.get_records(map_id)
+
         if not bool(query):
             # no existing run, add this
             db.session.add(self)
@@ -256,8 +258,11 @@ class MapTimes(db.Model):
             return {
                 "result": InsertResult.ADDED,
                 "rank": self.rank,
+                "points_gained": 0,
                 "completions": completions,
                 "points_gained": self.points,
+                "duration": self.duration,
+                "records": records,
             }
 
         # time already exists, check if faster
@@ -279,10 +284,32 @@ class MapTimes(db.Model):
                 "points_gained": self.points - old_points,
                 "completions": completions,
                 "improvement": improvement,
+                "duration": self.duration,
+                "records": records,
             }
 
         # slower
-        return {"result": InsertResult.NONE}
+        return {
+            "result": InsertResult.NONE,
+            "duration": self.duration,
+            "records": records,
+            "old_time": old_time,
+        }
+
+    @staticmethod
+    def get_records(map_id):
+        """Get map record for both classes."""
+        swr = (
+            MapTimes.query.filter(MapTimes.map_id == map_id, MapTimes.player_class == 2)
+            .order_by(MapTimes.duration)
+            .first()
+        )
+        dwr = (
+            MapTimes.query.filter(MapTimes.map_id == map_id, MapTimes.player_class == 4)
+            .order_by(MapTimes.duration)
+            .first()
+        )
+        return {"soldier": swr, "demoman": dwr}
 
     @staticmethod
     def update_ranks(map_id):
@@ -290,7 +317,7 @@ class MapTimes(db.Model):
         completions = {"soldier": 0, "demoman": 0}
 
         soldier_times = (
-            MapTimes.query.filter(MapTimes.map_id == map_id, MapTimes.player_class == 3)
+            MapTimes.query.filter(MapTimes.map_id == map_id, MapTimes.player_class == 2)
             .order_by(MapTimes.duration)
             .all()
         )

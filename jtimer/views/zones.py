@@ -218,6 +218,7 @@ def add_map_zone(map_id):
 
             if zone is None:
                 zone = Zone()
+                checkpoint.zone_id = zone.id_
 
             zone.x1, zone.y1, zone.z1 = point1
             zone.x2, zone.y2, zone.z2 = point2

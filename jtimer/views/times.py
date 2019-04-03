@@ -92,8 +92,8 @@ def insert_map(map_id):
       {
           "player_id": 1,
           "player_class": 2,
-          "start_time": 12345.6789,
-          "end_time": 9876.54321
+          "start_time": 9876.54321,
+          "end_time": 12345.6789
       }
 
     **Example response**:
@@ -105,7 +105,15 @@ def insert_map(map_id):
               "result": 2,
               "rank": 9,
               "points_gained": 404,
-              "completions": 1025,
+              "completions": {
+                  "soldier": 1000,
+                  "demoman": 500
+              },
+              "records": {
+                  "soldier": 1860.4123,
+                  "demoman": 1752.5105
+              },
+              "duration": 2469.13569,
               "improvement": 1234.56789,
               "message": "Time updated."
           }
@@ -134,6 +142,10 @@ def insert_map(map_id):
     player_class = data.get("player_class")
     start_time = data.get("start_time")
     end_time = data.get("end_time")
+
+    if end_time < start_time:
+        error = {"message": "end_time must be greater than start_time"}
+        return make_response(jsonify(error), 422)
 
     map_ = Map.query.filter_by(id_=map_id).first()
     if map_ is None:
