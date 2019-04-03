@@ -18,7 +18,7 @@ class ExtendedValidator(Validator):
         """
         key, value = required_if
 
-        # if target key doesn't exist, not required
+        # target key doesn't exist, not required
         if key not in self.document:
             return
 
@@ -27,7 +27,7 @@ class ExtendedValidator(Validator):
             return
 
         # required and we have a value
-        if _value:
+        if _value is not None:
             return
 
         # required and no value
