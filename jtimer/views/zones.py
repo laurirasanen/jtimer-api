@@ -102,12 +102,14 @@ def get_map_zones(map_id):
             "schema": {"type": "int"},
             "minlength": 3,
             "maxlength": 3,
+            "required": True,
         },
         "p2": {
             "type": "list",
             "schema": {"type": "int"},
             "minlength": 3,
             "maxlength": 3,
+            "required": True,
         },
         "orientation": {"type": "int", "min": -180, "max": 180, "required": False},
     }

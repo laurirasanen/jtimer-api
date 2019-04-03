@@ -126,9 +126,25 @@ def find_player():
 @players_index.route("/add", methods=["POST"])
 @validate_json(
     {
-        "steam_id": {"type": "string", "maxlength": 20, "empty": False},
-        "username": {"type": "string", "maxlength": 32, "empty": False},
-        "country": {"type": "string", "minlength": 2, "maxlength": 2, "empty": False},
+        "steam_id": {
+            "type": "string",
+            "maxlength": 20,
+            "empty": False,
+            "required": True,
+        },
+        "username": {
+            "type": "string",
+            "maxlength": 32,
+            "empty": False,
+            "required": True,
+        },
+        "country": {
+            "type": "string",
+            "minlength": 2,
+            "maxlength": 2,
+            "empty": False,
+            "required": True,
+        },
     }
 )
 @jwt_required
@@ -165,6 +181,8 @@ def add_player():
       }
 
     :query steam_id: the steamid to register or update.
+    :query username: player username.
+    :query country: 2-character ISO country code.
 
     :status 200: player registered or updated.
     :returns: Player

@@ -10,9 +10,14 @@ from jtimer.validation import validate_json
 @user_index.route("/changepassword", methods=["POST"])
 @validate_json(
     {
-        "username": {"type": "string", "empty": False},
-        "password": {"type": "string", "empty": False},
-        "newpassword": {"type": "string", "empty": False, "maxlength": 72},
+        "username": {"type": "string", "empty": False, "required": True},
+        "password": {"type": "string", "empty": False, "required": True},
+        "newpassword": {
+            "type": "string",
+            "empty": False,
+            "maxlength": 72,
+            "required": True,
+        },
     }
 )
 def change_password():

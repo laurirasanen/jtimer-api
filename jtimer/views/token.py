@@ -18,8 +18,8 @@ from jtimer.validation import validate_json
 @token_index.route("/auth", methods=["POST"])
 @validate_json(
     {
-        "username": {"type": "string", "empty": False},
-        "password": {"type": "string", "empty": False},
+        "username": {"type": "string", "empty": False, "required": True},
+        "password": {"type": "string", "empty": False, "required": True},
     }
 )
 def token_auth():

@@ -22,7 +22,7 @@ class Player(db.Model):
         """Json serializable dictionary of the model"""
         return {
             "id": self.id_,
-            "steamid": self.steamid,
+            "steamid": self.steam_id,
             "name": self.username,
             "country": self.country,
             "rank_info": {
@@ -30,6 +30,15 @@ class Player(db.Model):
                 "demo_points": self.d_points,
             },
         }
+
+    def add(self):
+        """Adds the model to the sqlalchemy session and commits.
+        Updates the existing model if it already exists in the database."""
+        query = Player.query.filter_by(id_=self.id_).first()
+        if not query:
+            db.session.add(self)
+
+        db.session.commit()
 
 
 class Zone(db.Model):
