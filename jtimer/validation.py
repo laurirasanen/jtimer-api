@@ -40,13 +40,11 @@ class ExtendedValidator(Validator):
         for field, definition in schema.items():
             value = self.document.get(field)
 
-            # has value, was checked by cerberus
-            if value is not None:
-                continue
-
-            required_if = self._resolve_rules_set(definition).get("required_if")
-            if required_if is not None:
-                self._validate_required_if(required_if, field, value)
+            # value missing, check for required_if rule
+            if value is None:
+                required_if = self._resolve_rules_set(definition).get("required_if")
+                if required_if is not None:
+                    self._validate_required_if(required_if, field, value)
 
         return not bool(self._errors)
 
