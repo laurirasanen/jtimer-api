@@ -6,7 +6,7 @@ from flask import jsonify, make_response
 from jtimer.blueprints import application_index
 
 
-@application_index.route("/")
+@application_index.route("/", methods=["GET"])
 def index():
     """View for index"""
     return make_response(
@@ -14,8 +14,8 @@ def index():
     )  # I'm a teapot
 
 
-@application_index.route("/info")
-@application_index.route("/version")
+@application_index.route("/info", methods=["GET"])
+@application_index.route("/version", methods=["GET"])
 def info():
     """View for getting api info"""
     config = ConfigParser()

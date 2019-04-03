@@ -8,7 +8,7 @@ from jtimer.models.database import Player
 from jtimer.validation import validate_json
 
 
-@players_index.route("/list")
+@players_index.route("/list", methods=["GET"])
 def list_players():
     """Return a list of players.
 
@@ -68,7 +68,7 @@ def list_players():
     return make_response(jsonify([p.json for p in players]), 200)
 
 
-@players_index.route("/search")
+@players_index.route("/search", methods=["GET"])
 def find_player():
     """Search for a player.
 
@@ -157,7 +157,7 @@ def add_player():
 
     .. sourcecode:: http
 
-      GET /players/add HTTP/1.1
+      POST /players/add HTTP/1.1
       Authorization: Bearer <access_token>
       Content-Type: application/json
       {
@@ -187,7 +187,6 @@ def add_player():
     :status 200: player registered or updated.
     :returns: Player
     """
-
     data = request.get_json()
     steam_id = data.get("steam_id")
     username = data.get("username")

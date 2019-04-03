@@ -22,7 +22,7 @@ class Player(db.Model):
         """Json serializable dictionary of the model"""
         return {
             "id": self.id_,
-            "steamid": self.steam_id,
+            "steam_id": self.steam_id,
             "name": self.username,
             "country": self.country,
             "rank_info": {

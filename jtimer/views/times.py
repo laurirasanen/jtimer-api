@@ -68,7 +68,7 @@ def get_times(map_id):
     return make_response(jsonify([t.json for t in times]), 200)
 
 
-@times_index.route("/insert/map/<int:map_id>")
+@times_index.route("/insert/map/<int:map_id>", methods=["POST"])
 @validate_json(
     {
         "player_id": {"type": "integer", "min": 1, "required": True},
