@@ -1,6 +1,6 @@
 """sqlalchemy models for flask application"""
 
-from enum import Enum
+from enum import IntEnum
 from passlib.hash import bcrypt
 
 from jtimer.extensions import db
@@ -256,7 +256,7 @@ class MapTimes(db.Model):
             and MapTimes.player_class == self.player_class
         ).first()
 
-        records = MapTimes.get_records(map_id)
+        records = MapTimes.get_records(self.map_id)
 
         if not bool(query):
             # no existing run, add this
@@ -318,7 +318,13 @@ class MapTimes(db.Model):
             .order_by(MapTimes.duration)
             .first()
         )
-        return {"soldier": swr, "demoman": dwr}
+        swr_duration = -1
+        if swr is not None:
+            swr_duration = swr.duration
+        dwr_duration = -1
+        if dwr is not None:
+            dwr_duration = dwr.duration
+        return {"soldier": swr_duration, "demoman": dwr_duration}
 
     @staticmethod
     def update_ranks(map_id):
@@ -464,7 +470,7 @@ class RevokedToken(db.Model):
         return bool(query)
 
 
-class InsertResult(Enum):
+class InsertResult(IntEnum):
     """Result of insert query.
     Used for responding to api requests."""
 

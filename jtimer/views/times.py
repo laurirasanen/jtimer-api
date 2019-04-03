@@ -158,6 +158,7 @@ def insert_map(map_id):
         player_class=player_class,
         start_time=start_time,
         end_time=end_time,
+        duration=end_time - start_time,
     )
     response = entry.add()
 
