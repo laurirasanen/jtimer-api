@@ -196,11 +196,7 @@ def add_map_zone(map_id):
         map_.add()
 
     else:
-        # checkpoints require index
-        index = data.get("index")
-        if index is None:
-            error = {"message": "Missing index for zone_type 'cp'."}
-            return make_response(jsonify(error), 422)
+        index = data.get("cp_index")
 
         # check for existing checkpoint
         checkpoint = MapCheckpoint.query.filter(
