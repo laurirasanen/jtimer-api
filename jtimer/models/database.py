@@ -11,7 +11,7 @@ class Player(db.Model):
     """Player table sqlalchemy model"""
 
     id_ = db.Column("id", db.Integer, primary_key=True)
-    steam_id = db.Column(db.String(17), nullable=False)
+    steam_id = db.Column(db.String(20), nullable=False)
     username = db.Column(db.String(32), nullable=False)
     country = db.Column(db.String(2), nullable=False)
     s_points = db.Column(db.Integer, default=0, nullable=False)

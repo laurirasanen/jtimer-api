@@ -1,9 +1,11 @@
 """flask views for /players endpoint"""
 
 from flask import jsonify, make_response, request
+from flask_jwt_extended import jwt_required
 
 from jtimer.blueprints import players_index
 from jtimer.models.database import Player
+from jtimer.validation import validate_json
 
 
 @players_index.route("/list")
@@ -117,5 +119,70 @@ def find_player():
 
     if player is None:
         return make_response("", 204)
+
+    return make_response(jsonify(player.json), 200)
+
+
+@players_index.route("/add", methods=["POST"])
+@validate_json(
+    {
+        "steam_id": {"type": "string", "maxlength": 20, "empty": False},
+        "username": {"type": "string", "maxlength": 32, "empty": False},
+        "country": {"type": "string", "minlength": 2, "maxlength": 2, "empty": False},
+    }
+)
+@jwt_required
+def add_player():
+    """Add a new player or update an existing one.
+
+    .. :quickref: Player; Add a player.
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+      GET /players/add HTTP/1.1
+      Authorization: Bearer <access_token>
+      Content-Type: application/json
+      {
+          "steam_id": "STEAM_1:1:50152141"
+      }
+
+    **Example response**:
+
+    .. sourcecode:: json
+
+      {
+          "id": 1,
+          "name": "Larry",
+          "rank_info": {
+              "demo_points": 0,
+              "demo_rank": 0,
+              "soldier_points": 0,
+              "soldier_rank": 0
+          },
+          "steamid": "STEAM_1:1:50152141"
+      }
+
+    :query steam_id: the steamid to register or update.
+
+    :status 200: player registered or updated.
+    :returns: Player
+    """
+
+    data = request.get_json()
+    steam_id = data.get("steam_id")
+    username = data.get("username")
+    country = data.get("country")
+
+    player = Player.query.filter_by(steam_id=steam_id).first()
+    if player is None:
+        player = Player(steam_id=steam_id)
+
+    # update username and country for existing players as well
+    player.username = username
+    player.country = country
+
+    player.add()
 
     return make_response(jsonify(player.json), 200)
