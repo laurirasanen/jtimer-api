@@ -246,7 +246,7 @@ class MapTimes(db.Model):
             "rank": self.rank,
         }
 
-    def add(self):
+    def add(self, checkpoints=[]):
         """Adds the model to the sqlalchemy session and commits.
         Updates the existing model if it already exists in the database.
         Existing time is only updated if the new one is faster."""
@@ -267,7 +267,6 @@ class MapTimes(db.Model):
             return {
                 "result": InsertResult.ADDED,
                 "rank": self.rank,
-                "points_gained": 0,
                 "completions": completions,
                 "points_gained": self.points,
                 "duration": self.duration,
@@ -278,13 +277,38 @@ class MapTimes(db.Model):
         old_time = query.end_time - query.start_time
         new_time = self.end_time - self.start_time
         old_points = query.points
+
         if new_time < old_time:
             improvement = old_time - new_time
+
             # faster, add this
             db.session.add(self)
+
+            # add new checkpoints
+            for checkpoint in checkpoints:
+                map_checkpoint = MapCheckpoint.query.filter_by(
+                    map_id=self.map_id, cp_index=checkpoint["cp_index"]
+                ).first()
+                if map_checkpoint is not None:
+                    map_checkpoint_time = MapCheckpointTimes(
+                        checkpoint_id=map_checkpoint.id_,
+                        time_id=self.id_,
+                        time=checkpoint["time"],
+                    )
+                    db.session.add(map_checkpoint_time)
+
+            # remove old checkpoints
+            old_checkpoints = MapCheckpointTimes.query.filter_by(
+                time_id=query.id_
+            ).all()
+            if old_checkpoints is not None:
+                for old_checkpoint in old_checkpoints:
+                    db.session.delete(old_checkpoint)
+
             # remove old time
             db.session.delete(query)
             db.session.commit()
+
             # update ranks
             completions = MapTimes.update_ranks(self.map_id)
             return {

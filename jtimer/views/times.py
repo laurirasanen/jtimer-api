@@ -4,7 +4,13 @@ from flask import jsonify, make_response, request
 from flask_jwt_extended import jwt_required
 
 from jtimer.blueprints import times_index
-from jtimer.models.database import Map, MapTimes, InsertResult
+from jtimer.models.database import (
+    Map,
+    MapTimes,
+    MapCheckpoint,
+    MapCheckpointTimes,
+    InsertResult,
+)
 from jtimer.validation import validate_json
 
 
@@ -75,6 +81,18 @@ def get_times(map_id):
         "player_class": {"type": "integer", "allowed": [2, 4], "required": True},
         "start_time": {"type": "float", "min": 0, "required": True},
         "end_time": {"type": "float", "min": 0, "required": True},
+        "checkpoints": {
+            "type": "list",
+            "minlength": 0,
+            "required": True,
+            "schema": {
+                "type": "dict",
+                "schema": {
+                    "cp_index": {"type": "integer", "min": 1, "required": True},
+                    "time": {"type": "float", "min": 0, "required": True},
+                },
+            },
+        },
     }
 )
 @jwt_required
@@ -142,6 +160,7 @@ def insert_map(map_id):
     player_class = data.get("player_class")
     start_time = data.get("start_time")
     end_time = data.get("end_time")
+    checkpoints = data.get("checkpoints")
 
     if end_time < start_time:
         error = {"message": "end_time must be greater than start_time"}
@@ -160,16 +179,7 @@ def insert_map(map_id):
         end_time=end_time,
         duration=end_time - start_time,
     )
-    response = entry.add()
-
-    if response["result"] is InsertResult.ADDED:
-        response["message"] = "Time added."
-
-    elif response["result"] is InsertResult.UPDATED:
-        response["message"] = "Time updated."
-
-    else:
-        response["message"] = "Slower than PR, no update."
+    response = entry.add(checkpoints)
 
     response["result"] = int(response["result"])
 
