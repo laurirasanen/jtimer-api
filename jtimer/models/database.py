@@ -342,6 +342,25 @@ class MapTimes(db.Model):
 
             # update ranks
             completions = MapTimes.update_ranks(self.map_id)
+
+            if self.rank == 1:
+                # separate old records if time is new record
+                new_records = records.copy()
+                if self.player_class == 2:
+                    new_records["soldier"] = self.json
+                elif self.player_class == 4:
+                    new_records["demoman"] = self.json
+                return {
+                    "result": InsertResult.UPDATED,
+                    "rank": self.rank,
+                    "points_gained": self.points - old_points,
+                    "completions": completions,
+                    "improvement": improvement,
+                    "duration": self.duration,
+                    "records": new_records,
+                    "old_records": records,
+                }
+
             return {
                 "result": InsertResult.UPDATED,
                 "rank": self.rank,
@@ -376,7 +395,7 @@ class MapTimes(db.Model):
         swr_json = None
         if swr is not None:
             swr_json = swr.json
-        dwr_json = -1
+        dwr_json = None
         if dwr is not None:
             dwr_json = dwr.json
         return {"soldier": swr_json, "demoman": dwr_json}
