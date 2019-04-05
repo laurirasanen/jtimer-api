@@ -333,7 +333,7 @@ class MapTimes(db.Model):
                     db.session.delete(old_checkpoint)
 
                 # have to commit checkpoint deletions first
-                # to avoid foreign key contraint errors
+                # to avoid foreign key constraint errors
                 db.session.commit()
 
             # remove old time

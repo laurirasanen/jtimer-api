@@ -29,8 +29,7 @@ def get_times(map_id):
     **Example response**:
 
     .. sourcecode:: json
-
-      [
+      "soldier": [
           {
               "id": 56,
               "map_id": 1,
@@ -60,7 +59,8 @@ def get_times(map_id):
                   },
               ]
           }
-      ]
+      ],
+      "demoman": []
 
     :query map_id: map id.
 
@@ -74,16 +74,26 @@ def get_times(map_id):
     limit = max(1, min(limit, 50))
     start = max(1, start)
 
-    times = (
-        MapTimes.query.filter(MapTimes.id_ == map_id, MapTimes.rank >= start)
+    soldier_times = (
+        MapTimes.query.filter(MapTimes.id_ == map_id, MapTimes.rank >= start, MapTimes.player_class == 2)
         .order_by(MapTimes.rank)
         .all()[:limit]
     )
+    soldier_times = [] if soldier_times is None else soldier_times
 
-    if times is None:
-        return make_response("", 204)
+    demoman_times = (
+        MapTimes.query.filter(MapTimes.id_ == map_id, MapTimes.rank >= start, MapTimes.player_class == 4)
+        .order_by(MapTimes.rank)
+        .all()[:limit]
+    )
+    demoman_times = [] if demoman_times is None else demoman_times
 
-    return make_response(jsonify([t.json for t in times]), 200)
+    times = {
+        "soldier": [st.json for st in soldier_times],
+        "demoman": [dt.json for dt in demoman_times]
+    }
+
+    return make_response(jsonify(times), 200)
 
 
 @times_index.route("/insert/map/<int:map_id>", methods=["POST"])
