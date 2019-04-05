@@ -4,7 +4,7 @@ from flask import jsonify, make_response, request
 from flask_jwt_extended import jwt_required
 
 from jtimer.blueprints import maps_index
-from jtimer.models.database import Map, Author
+from jtimer.models.database import Map, Author, MapTimes
 from jtimer.validation import validate_json
 
 
@@ -35,6 +35,10 @@ def map_info(map_id):
               "soldier": 1402,
               "demoman": 2401
           },
+          "records": {
+              "soldier": <time object>
+              "demoman": <time object>
+          },
           "authors": [
               {
                   "id": 5,
@@ -62,6 +66,9 @@ def map_info(map_id):
     if authors is not None:
         for author in authors:
             response["authors"].append(author.json)
+
+    records = MapTimes.get_records(map_.id_)
+    response["records"] = records
 
     return make_response(jsonify(response), 200)
 
@@ -93,6 +100,10 @@ def map_info_name(mapname):
               "soldier": 1402,
               "demoman": 2401
           },
+          "records": {
+              "soldier": <time object>
+              "demoman": <time object>
+          },
           "authors": [
               {
                   "id": 5,
@@ -121,6 +132,9 @@ def map_info_name(mapname):
     if authors is not None:
         for author in authors:
             response["authors"].append(author.json)
+
+    records = MapTimes.get_records(map_.id_)
+    response["records"] = records
 
     return make_response(jsonify(response), 200)
 

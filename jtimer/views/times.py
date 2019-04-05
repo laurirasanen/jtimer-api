@@ -47,6 +47,18 @@ def get_times(map_id):
               "class": 2,
               "time": 10424.51525167,
               "rank": 1,
+              "checkpoints": [
+                  {
+                      "id": 42,
+                      "time": 1000.12345,
+                      "cp_index": 1
+                  },
+                  {
+                      "id": 43,
+                      "time": 1512.1401050,
+                      "cp_index": 2
+                  },
+              ]
           }
       ]
 
@@ -111,7 +123,17 @@ def insert_map(map_id):
           "player_id": 1,
           "player_class": 2,
           "start_time": 9876.54321,
-          "end_time": 12345.6789
+          "end_time": 12345.6789,
+          "checkpoints": [
+              {
+                  "cp_index": 1,
+                  "time": 9950
+              },
+              {
+                  "cp_index": 2,
+                  "time": 12000
+              }
+          ]
       }
 
     **Example response**:
@@ -128,12 +150,11 @@ def insert_map(map_id):
                   "demoman": 500
               },
               "records": {
-                  "soldier": 1860.4123,
-                  "demoman": 1752.5105
+                  "soldier": <Time object>,
+                  "demoman": <Time object>
               },
               "duration": 2469.13569,
-              "improvement": 1234.56789,
-              "message": "Time updated."
+              "improvement": 1234.56789
           }
       ]
 
@@ -142,6 +163,7 @@ def insert_map(map_id):
     :query player_class: player class.
     :query start_time: run start time.
     :query end_time: run end time.
+    :query checkpoints: list of checkpoints.
 
     :status 200: Success.
     :status 404: Map not found.

@@ -227,24 +227,35 @@ class MapTimes(db.Model):
     def json(self):
         """Json serializable dictionary of the model"""
         player = Player.query.filter_by(id_=self.player_id).first()
-        if player is None:
-            return {
-                "id": self.id_,
-                "map_id": self.map_id,
-                "player_id": self.player_id,
-                "class": self.player_class,
-                "time": self.end_time - self.start_time,
-                "rank": self.rank,
-            }
+        player_json = None
+        if player is not None:
+            player_json = player.json
+        checkpoints = self.get_checkpoint_times()
 
         return {
             "id": self.id_,
             "map_id": self.map_id,
-            "player": player.json,
+            "player": player_json,
             "class": self.player_class,
             "time": self.end_time - self.start_time,
             "rank": self.rank,
+            "checkpoints": checkpoints,
         }
+
+    def get_checkpoint_times(self):
+        checkpoint_times = MapCheckpointTimes.query.filter_by(time_id=self.id_).all()
+        checkpoint_times_json = []
+        if checkpoint_times is not None:
+            for checkpoint_time in checkpoint_times:
+                map_checkpoint = MapCheckpoint.query.filter_by(
+                    id_=checkpoint_time.checkpoint_id
+                ).first()
+                if map_checkpoint is not None:
+                    checkpoint_times_json.append(checkpoint_time.json)
+                    checkpoint_times_json[-1]["cp_index"] = map_checkpoint.cp_index
+                    checkpoint_times_json[-1]["time"] -= self.start_time
+
+        return checkpoint_times_json
 
     def add(self, checkpoints=[]):
         """Adds the model to the sqlalchemy session and commits.
@@ -261,9 +272,25 @@ class MapTimes(db.Model):
         if not bool(query):
             # no existing run, add this
             db.session.add(self)
+
+            # add new checkpoints
+            for checkpoint in checkpoints:
+                map_checkpoint = MapCheckpoint.query.filter_by(
+                    map_id=self.map_id, cp_index=checkpoint["cp_index"]
+                ).first()
+                if map_checkpoint is not None:
+                    map_checkpoint_time = MapCheckpointTimes(
+                        checkpoint_id=map_checkpoint.id_,
+                        time_id=self.id_,
+                        time=checkpoint["time"],
+                    )
+                    db.session.add(map_checkpoint_time)
+
             db.session.commit()
+
             # update ranks
             completions = MapTimes.update_ranks(self.map_id)
+
             return {
                 "result": InsertResult.ADDED,
                 "rank": self.rank,
@@ -305,6 +332,10 @@ class MapTimes(db.Model):
                 for old_checkpoint in old_checkpoints:
                     db.session.delete(old_checkpoint)
 
+                # have to commit checkpoint deletions first
+                # to avoid foreign key contraint errors
+                db.session.commit()
+
             # remove old time
             db.session.delete(query)
             db.session.commit()
@@ -342,13 +373,13 @@ class MapTimes(db.Model):
             .order_by(MapTimes.duration)
             .first()
         )
-        swr_duration = -1
+        swr_json = None
         if swr is not None:
-            swr_duration = swr.duration
-        dwr_duration = -1
+            swr_json = swr.json
+        dwr_json = -1
         if dwr is not None:
-            dwr_duration = dwr.duration
-        return {"soldier": swr_duration, "demoman": dwr_duration}
+            dwr_json = dwr.json
+        return {"soldier": swr_json, "demoman": dwr_json}
 
     @staticmethod
     def update_ranks(map_id):
@@ -418,6 +449,15 @@ class MapCheckpointTimes(db.Model):
     checkpoint_id = db.Column(None, db.ForeignKey("map_checkpoint.id"), nullable=False)
     time_id = db.Column(None, db.ForeignKey("map_times.id"), nullable=False)
     time = db.Column(db.Float(precision=53), nullable=False)
+
+    def get_map_checkpoint(self):
+        query = MapCheckpoint.query.filter_by(id_=checkpoint_id).first()
+        return query
+
+    @property
+    def json(self):
+        """Json serializable dictionary of the model"""
+        return {"id": self.checkpoint_id, "time": self.time}
 
 
 class CourseCheckpointTimes(db.Model):
