@@ -75,14 +75,16 @@ def get_times(map_id):
     start = max(1, start)
 
     soldier_times = (
-        MapTimes.query.filter(MapTimes.id_ == map_id, MapTimes.rank >= start, MapTimes.player_class == 2)
+        MapTimes.query.filter(MapTimes.map_id == map_id, MapTimes.rank >= start, MapTimes.player_class == 2)
         .order_by(MapTimes.rank)
         .all()[:limit]
     )
+    print(f"before: {soldier_times}")
     soldier_times = [] if soldier_times is None else soldier_times
+    print(f"after: {soldier_times}")
 
     demoman_times = (
-        MapTimes.query.filter(MapTimes.id_ == map_id, MapTimes.rank >= start, MapTimes.player_class == 4)
+        MapTimes.query.filter(MapTimes.map_id == map_id, MapTimes.rank >= start, MapTimes.player_class == 4)
         .order_by(MapTimes.rank)
         .all()[:limit]
     )
