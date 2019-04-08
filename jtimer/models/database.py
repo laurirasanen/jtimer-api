@@ -1,7 +1,9 @@
 """sqlalchemy models for flask application"""
 
+import operator
 from enum import IntEnum
 from passlib.hash import bcrypt
+from sqlalchemy import func, or_, desc, literal_column
 
 from jtimer.extensions import db
 from jtimer.points import calc_points
@@ -16,6 +18,8 @@ class Player(db.Model):
     country = db.Column(db.String(2), nullable=False)
     s_points = db.Column(db.Integer, default=0, nullable=False)
     d_points = db.Column(db.Integer, default=0, nullable=False)
+    s_rank = db.Column(db.Integer, default=0, nullable=False)
+    d_rank = db.Column(db.Integer, default=0, nullable=False)
 
     @property
     def json(self):
@@ -28,6 +32,8 @@ class Player(db.Model):
             "rank_info": {
                 "soldier_points": self.s_points,
                 "demo_points": self.d_points,
+                "soldier_rank": self.s_rank,
+                "demoman_rank": self.d_rank,
             },
         }
 
@@ -37,6 +43,60 @@ class Player(db.Model):
         query = Player.query.filter_by(id_=self.id_).first()
         if not query:
             db.session.add(self)
+
+        db.session.commit()
+
+    @staticmethod
+    def calculate_ranks():
+        """Calculate player ranks and points"""
+
+        # Get points from MapTimes
+        soldier_points = (
+            MapTimes.query.with_entities(
+                MapTimes.player_id, func.sum(MapTimes.points).label("points")
+            )
+            .filter(MapTimes.player_class == 2)
+            .group_by(MapTimes.player_id)
+            .filter(literal_column("points") > 0)
+            .order_by(desc(literal_column("points")))
+            .all()
+        )
+        if soldier_points is None:
+            return
+
+        demoman_points = (
+            MapTimes.query.with_entities(
+                MapTimes.player_id, func.sum(MapTimes.points).label("points")
+            )
+            .filter(MapTimes.player_class == 4)
+            .group_by(MapTimes.player_id)
+            .filter(literal_column("points") > 0)
+            .order_by(desc(literal_column("points")))
+            .all()
+        )
+        if demoman_points is None:
+            return
+
+        # Get players
+        players = Player.query.all()
+        if players is None:
+            return
+
+        # Update soldier ranks and points
+        for i in range(0, len(soldier_points)):
+            for player in players:
+                if player.id_ == soldier_points[i].player_id:
+                    player.s_points = soldier_points[i].points
+                    player.s_rank = i + 1
+                    break
+
+        # Update demoman ranks and points
+        for i in range(0, len(demoman_points)):
+            for player in players:
+                if player.id_ == demoman_points[i].player_id:
+                    player.d_points = demoman_points[i].points
+                    player.d_rank = i + 1
+                    break
 
         db.session.commit()
 
@@ -434,6 +494,10 @@ class MapTimes(db.Model):
                 )
 
         db.session.commit()
+
+        # Update player ranks and points
+        Player.calculate_ranks()
+
         return completions
 
 

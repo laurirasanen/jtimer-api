@@ -75,7 +75,11 @@ def get_times(map_id):
     start = max(1, start)
 
     soldier_times = (
-        MapTimes.query.filter(MapTimes.map_id == map_id, MapTimes.rank >= start, MapTimes.player_class == 2)
+        MapTimes.query.filter(
+            MapTimes.map_id == map_id,
+            MapTimes.rank >= start,
+            MapTimes.player_class == 2,
+        )
         .order_by(MapTimes.rank)
         .all()[:limit]
     )
@@ -84,7 +88,11 @@ def get_times(map_id):
     print(f"after: {soldier_times}")
 
     demoman_times = (
-        MapTimes.query.filter(MapTimes.map_id == map_id, MapTimes.rank >= start, MapTimes.player_class == 4)
+        MapTimes.query.filter(
+            MapTimes.map_id == map_id,
+            MapTimes.rank >= start,
+            MapTimes.player_class == 4,
+        )
         .order_by(MapTimes.rank)
         .all()[:limit]
     )
@@ -92,7 +100,7 @@ def get_times(map_id):
 
     times = {
         "soldier": [st.json for st in soldier_times],
-        "demoman": [dt.json for dt in demoman_times]
+        "demoman": [dt.json for dt in demoman_times],
     }
 
     return make_response(jsonify(times), 200)
