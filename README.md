@@ -1,5 +1,5 @@
 # jtimer-api
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors)  
+[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors)  
 api for [jtimer](https://github.com/occasionally-cool/jtimer)
 
 # Documentation
@@ -11,7 +11,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore -->
-<table><tr><td align="center"><a href="https://laurirasanen.github.io/"><img src="https://avatars3.githubusercontent.com/u/26773737?v=4" width="100px;" alt="Lauri Räsänen"/><br /><sub><b>Lauri Räsänen</b></sub></a><br /><a href="https://github.com/occasionally-cool/jtimer-api/commits?author=laurirasanen" title="Code">💻</a></td></tr></table>
+<table><tr><td align="center"><a href="https://laurirasanen.github.io/"><img src="https://avatars3.githubusercontent.com/u/26773737?v=4" width="100px;" alt="Lauri Räsänen"/><br /><sub><b>Lauri Räsänen</b></sub></a><br /><a href="https://github.com/occasionally-cool/jtimer-api/commits?author=laurirasanen" title="Code">💻</a></td><td align="center"><a href="https://github.com/arispoloway"><img src="https://avatars2.githubusercontent.com/u/5377527?v=4" width="100px;" alt="Aris Poloway"/><br /><sub><b>Aris Poloway</b></sub></a><br /><a href="#ideas-arispoloway" title="Ideas, Planning, & Feedback">🤔</a></td></tr></table>
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
