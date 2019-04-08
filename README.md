@@ -1,13 +1,12 @@
 # jtimer-api
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors)
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors)  
 api for [jtimer](https://github.com/occasionally-cool/jtimer)
 
 # Documentation
 [![Documentation Status](https://readthedocs.org/projects/jtimer-api/badge/?version=latest)](https://jtimer-api.readthedocs.io/en/latest/?badge=latest)  
 https://jtimer-api.readthedocs.io/en/latest
 
-## Contributors
-
+# Contributors
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
