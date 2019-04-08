@@ -1,0 +1,23 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "laurirasanen",
+      "name": "Lauri Räsänen",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/26773737?v=4",
+      "profile": "https://laurirasanen.github.io/",
+      "contributions": [
+        "code"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "jtimer-api",
+  "projectOwner": "occasionally-cool",
+  "repoType": "github",
+  "repoHost": "https://github.com"
+}
