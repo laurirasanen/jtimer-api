@@ -122,6 +122,9 @@ def map_info_name(mapname):
     map_ = Map.query.filter_by(mapname=mapname).first()
 
     if map_ is None:
+        map_ = Map.query.filter(Map.mapname.like(f"%{mapname}%")).first()
+
+    if map_ is None:
         response = {"message": "Map not found."}
         return make_response(jsonify(response), 404)
 

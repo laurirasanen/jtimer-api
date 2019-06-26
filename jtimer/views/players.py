@@ -116,6 +116,8 @@ def find_player():
         player = Player.query.filter_by(steam_id=steam_id).first()
     if player is None:
         player = Player.query.filter_by(username=name).first()
+    if player is None:
+        player = Player.query.filter(Player.username.like(f"%{name}%")).first()
 
     if player is None:
         return make_response("", 204)

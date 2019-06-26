@@ -5,7 +5,7 @@ import zipfile
 from configparser import ConfigParser
 
 CFG_PATH = "./jtimer/config/info.ini"
-FILES = ["application.py", "setup.py", "requirements.txt", "jtimer", ".ebextensions"]
+FILES = ["application.py", "requirements.txt", "jtimer", ".ebextensions"]
 NAME = "jtimer-api"
 
 
